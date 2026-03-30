@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #e8e4dd;
+    --accent: #c4ff4e;
+    --dim: #5a5750;
+    --card-bg: #111110;
+    --border: #1f1e1c;
+    --red: #ff6b6b;
+    --blue: #5cacff;
+    --amber: #ffb84e;
+    --nl-accent: #ff6f3c;
+    --hr-accent: #3c8bff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .noise {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+
+  .launch-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+    transition: opacity 0.5s ease;
+  }
+  .launch-state.hidden { opacity: 0; pointer-events: none; position: absolute; }
+
+  .title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 52px;
+    font-weight: 400;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 52px;
+  }
+
+  .generate-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 22px 56px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  .generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(196, 255, 78, 0.15);
+  }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .loading-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+  }
+  .loading-state.active { display: flex; }
+
+  .loader {
+    width: 3px;
+    height: 40px;
+    background: var(--accent);
+    animation: pulse 1s ease-in-out infinite;
+    margin-bottom: 32px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.2; transform: scaleY(0.6); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  .loading-status {
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .briefing-state {
+    display: none;
+    animation: fadeUp 0.6s ease;
+  }
+  .briefing-state.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .briefing-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+  }
+
+  .briefing-date {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .briefing-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+  }
+
+  .briefing-meta {
+    margin-top: 12px;
+    color: var(--dim);
+    font-size: 11px;
+  }
+
+  .section-content h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    color: var(--fg);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-content h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 28px;
+    margin-bottom: 10px;
+  }
+
+  .section-content p {
+    margin-bottom: 14px;
+    color: #c4c0b8;
+  }
+
+  .section-content ul {
+    list-style: none;
+    margin-bottom: 14px;
+  }
+
+  .section-content li {
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 8px;
+    color: #c4c0b8;
+  }
+
+  .section-content li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .section-content strong { color: var(--fg); font-weight: 500; }
+  .section-content em { color: var(--amber); font-style: normal; }
+
+  .country-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 700px) {
+    .country-grid { grid-template-columns: 1fr; }
+  }
+
+  .country-col {
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    padding: 28px;
+  }
+
+  .country-col-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .country-flag { font-size: 24px; line-height: 1; }
+
+  .country-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+
+  .col-nl .country-name { color: var(--nl-accent); }
+  .col-hr .country-name { color: var(--hr-accent); }
+  .col-nl .section-content h3 { color: var(--nl-accent); }
+  .col-hr .section-content h3 { color: var(--hr-accent); }
+  .col-nl .section-content li::before { color: var(--nl-accent); }
+  .col-hr .section-content li::before { color: var(--hr-accent); }
+
+  .country-col .section-content h2 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
+  .country-col .section-content h3 { font-size: 11px; margin-top: 20px; }
+  .country-col .section-content p,
+  .country-col .section-content li { font-size: 13px; }
+
+  .reset-btn {
+    margin-top: 48px;
+    padding: 12px 24px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--fg); color: var(--fg); }
+
+  .error-msg {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 16px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="container">
+
+  <div class="launch-state" id="launchState">
+    <h1 class="title">Daily Briefing</h1>
+    <p class="subtitle">Reddit · News · Aggregated</p>
+    <button class="generate-btn" id="generateBtn" onclick="generate()">Generate Briefing</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="loading-state" id="loadingState">
+    <div class="loader"></div>
+    <div class="loading-status" id="loadingStatus">Pulling feeds...</div>
+  </div>
+
+  <div class="briefing-state" id="briefingState">
+    <div class="briefing-header">
+      <div class="briefing-date" id="briefingDate"></div>
+      <h1 class="briefing-title">Daily Briefing</h1>
+      <div class="briefing-meta" id="briefingMeta"></div>
+    </div>
+    <div class="section-content" id="mainBriefing"></div>
+    <div class="country-grid">
+      <div class="country-col col-nl">
+        <div class="country-col-header">
+          <span class="country-flag">🇳🇱</span>
+          <span class="country-name">Netherlands</span>
+        </div>
+        <div class="section-content" id="nlBriefing"><p style="color:var(--dim)">Generating...</p></div>
+      </div>
+      <div class="country-col col-hr">
+        <div class="country-col-header">
+          <span class="country-flag">🇭🇷</span>
+          <span class="country-name">Croatia</span>
+        </div>
+        <div class="section-content" id="hrBriefing"><p style="color:var(--dim)">Generating...</p></div>
+      </div>
+    </div>
+    <button class="reset-btn" onclick="reset()">&#8592; Generate Another</button>
+  </div>
+
+</div>
+
+<script>
+const SUBS_GLOBAL = ['worldnews', 'technology', 'LocalLLaMA', 'economics', 'geopolitics', 'europe'];
+const SUBS_NL = ['thenetherlands', 'amsterdam'];
+const SUBS_HR = ['croatia', 'zagreb'];
+
+// ── FETCH VIA LOCAL PROXY ──
+async function fetchReddit(subreddits, limit = 20) {
+  const posts = [];
+  const fetches = subreddits.map(async (sub) => {
+    try {
+      const res = await fetch(`/api/reddit/${sub}?limit=${limit}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      for (const child of (data?.data?.children || [])) {
+        const d = child.data;
+        if (d.stickied) continue;
+        posts.push({
+          source: `r/${sub}`,
+          title: d.title,
+          score: d.score,
+          comments: d.num_comments,
+          selftext: (d.selftext || '').slice(0, 300),
+        });
+      }
+    } catch (e) {
+      console.warn(`r/${sub} failed:`, e);
+    }
+  });
+  await Promise.all(fetches);
+  posts.sort((a, b) => b.score - a.score);
+  return posts.slice(0, 50);
+}
+
+async function fetchNews(params) {
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`/api/news?${qs}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.articles || []).map(a => ({
+      source: a.source?.name || 'News',
+      title: a.title,
+      description: (a.description || '').slice(0, 200),
+    }));
+  } catch (e) {
+    console.warn('News fetch failed:', e);
+    return [];
+  }
+}
+
+async function callLLM(systemPrompt, userPrompt) {
+  const res = await fetch('/api/llm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`LLM error (${res.status}): ${err}`);
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+function fmtReddit(posts) {
+  return posts.map(p =>
+    `[${p.source}] (score:${p.score}, comments:${p.comments}) ${p.title}${p.selftext ? '\n' + p.selftext : ''}`
+  ).join('\n\n');
+}
+
+function fmtNews(articles) {
+  return articles.map(a =>
+    `[${a.source}] ${a.title}${a.description ? ' — ' + a.description : ''}`
+  ).join('\n\n');
+}
+
+const MAIN_SYSTEM = `You are a daily intelligence briefing generator. Concise, high-signal.
+
+RULES:
+- ONLY major developments: geopolitics, economic shifts, AI/tech releases, policy changes, major incidents.
+- NO personal stories, celebrity gossip, lifestyle, fluff.
+- NO individual opinions. Aggregate sentiment as directional vibes.
+- Markdown: ## for sections, ### for subsections, bullet points for items.
+- Sections (skip if empty): Geopolitics & Conflict, Economy & Markets, AI & Technology, Science, Policy & Regulation, Vibe Check.
+- Terse. Every sentence carries information. No preambles, no sign-offs.
+- "Vibe Check" at the end: overall Reddit community mood on notable topics.`;
+
+const COUNTRY_SYSTEM = `You are a local news briefing generator for a specific country. Concise, high-signal.
+
+RULES:
+- Report notable local developments: politics, economy, policy, major incidents, society.
+- Translate all non-English headlines to English.
+- NO fluff, celebrity gossip, or sports unless major national event.
+- Aggregate sentiment as vibes where applicable.
+- Markdown: ### for subsections, bullet points. No ## headers.
+- Brief — sidebar column, not main briefing. 5-10 bullet points max.
+- No preambles, no sign-offs.`;
+
+function md(text) {
+  let html = text
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+  html = html.split('\n\n').map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (block.startsWith('<')) return block;
+    return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+  }).join('\n');
+  return html;
+}
+
+function setStatus(msg) { document.getElementById('loadingStatus').textContent = msg; }
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+async function generate() {
+  document.getElementById('errorMsg').classList.remove('visible');
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('launchState').classList.add('hidden');
+  document.getElementById('loadingState').classList.add('active');
+
+  try {
+    setStatus('Pulling all feeds...');
+    const [globalReddit, nlReddit, hrReddit, globalNews, nlNews, hrNews] = await Promise.all([
+      fetchReddit(SUBS_GLOBAL),
+      fetchReddit(SUBS_NL, 15),
+      fetchReddit(SUBS_HR, 15),
+      fetchNews({ language: 'en', pageSize: 25 }),
+      fetchNews({ country: 'nl', pageSize: 15 }),
+      fetchNews({ country: 'hr', pageSize: 15 }),
+    ]);
+
+    const total = globalReddit.length + nlReddit.length + hrReddit.length +
+                  globalNews.length + nlNews.length + hrNews.length;
+
+    setStatus(`Analyzing ${total} items across 3 briefings...`);
+
+    const [mainBriefing, nlBriefing, hrBriefing] = await Promise.all([
+      callLLM(MAIN_SYSTEM, `Generate today's briefing:\n\n=== REDDIT ===\n${fmtReddit(globalReddit) || 'No data.'}\n\n=== NEWS ===\n${fmtNews(globalNews) || 'No data.'}\n\nMarkdown now.`),
+      callLLM(COUNTRY_SYSTEM, `Netherlands local briefing:\n\n=== REDDIT ===\n${fmtReddit(nlReddit) || 'No data.'}\n\n=== DUTCH NEWS ===\n${fmtNews(nlNews) || 'No data.'}\n\nMarkdown now.`),
+      callLLM(COUNTRY_SYSTEM, `Croatia local briefing:\n\n=== REDDIT ===\n${fmtReddit(hrReddit) || 'No data.'}\n\n=== CROATIAN NEWS ===\n${fmtNews(hrNews) || 'No data.'}\n\nMarkdown now.`),
+    ]);
+
+    const now = new Date();
+    document.getElementById('briefingDate').textContent = now.toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    document.getElementById('briefingMeta').textContent =
+      `${total} sources · 3 briefings · generated ${now.toLocaleTimeString()}`;
+    document.getElementById('mainBriefing').innerHTML = md(mainBriefing);
+    document.getElementById('nlBriefing').innerHTML = md(nlBriefing);
+    document.getElementById('hrBriefing').innerHTML = md(hrBriefing);
+
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('briefingState').classList.add('active');
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('launchState').classList.remove('hidden');
+    document.getElementById('generateBtn').disabled = false;
+    showError(e.message);
+  }
+}
+
+function reset() {
+  document.getElementById('briefingState').classList.remove('active');
+  document.getElementById('nlBriefing').innerHTML = '<p style="color:var(--dim)">Generating...</p>';
+  document.getElementById('hrBriefing').innerHTML = '<p style="color:var(--dim)">Generating...</p>';
+  document.getElementById('launchState').classList.remove('hidden');
+  document.getElementById('generateBtn').disabled = false;
+}
+</script>
+</body>
+</html>
