@@ -4,20 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Briefing</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0a;
-    --fg: #e8e4dd;
-    --accent: #c4ff4e;
-    --dim: #5a5750;
-    --card-bg: #111110;
-    --border: #1f1e1c;
-    --red: #ff6b6b;
-    --blue: #5cacff;
-    --amber: #ffb84e;
-    --nl-accent: #ff6f3c;
-    --hr-accent: #3c8bff;
+    --bg: #f4f1ea;
+    --fg: #1a1a1a;
+    --headline: #000;
+    --dim: #6b6459;
+    --rule: #c8c0b4;
+    --rule-dark: #8a8279;
+    --cite: #2a4d8f;
+    --red: #8b0000;
+    --subhead: #3a3a3a;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,26 +23,27 @@
   body {
     background: var(--bg);
     color: var(--fg);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    line-height: 1.7;
+    font-family: 'Old Standard TT', Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    line-height: 1.65;
     min-height: 100vh;
   }
 
   .noise {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 9999;
   }
 
   .container {
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 60px 24px;
+    padding: 40px 32px;
   }
 
+  /* ── LAUNCH STATE ── */
   .launch-state {
     display: flex;
     flex-direction: column;
@@ -54,72 +53,125 @@
     text-align: center;
     transition: opacity 0.5s ease;
   }
-  .launch-state.hidden { opacity: 0; pointer-events: none; position: absolute; }
+  .launch-state.hidden { display: none; }
+
+  .masthead {
+    width: 100%;
+    border-top: 4px double var(--headline);
+    border-bottom: 1px solid var(--rule);
+    padding: 24px 0 16px;
+    margin-bottom: 8px;
+  }
 
   .title {
-    font-family: 'Instrument Serif', serif;
-    font-size: 52px;
-    font-weight: 400;
-    letter-spacing: -1px;
-    margin-bottom: 8px;
+    font-family: 'UnifrakturCook', 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--headline);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .masthead-date {
+    font-family: 'Old Standard TT', serif;
+    font-size: 12px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 8px;
   }
 
   .subtitle {
     color: var(--dim);
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 52px;
+    font-family: 'Old Standard TT', serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    border-bottom: 4px double var(--headline);
+    padding-bottom: 12px;
+    margin-bottom: 48px;
+    width: 100%;
   }
 
   .generate-btn {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    font-family: 'DM Mono', monospace;
-    font-size: 15px;
-    font-weight: 500;
-    padding: 22px 56px;
+    background: transparent;
+    color: var(--headline);
+    border: 2px solid var(--headline);
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 16px 48px;
     cursor: pointer;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     transition: all 0.2s ease;
   }
   .generate-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 40px rgba(196, 255, 78, 0.15);
+    background: var(--headline);
+    color: var(--bg);
   }
-  .generate-btn:active { transform: translateY(0); }
-  .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .generate-btn:active { transform: scale(0.98); }
+  .generate-btn:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; color: var(--headline); }
 
+  /* ── LOADING STATE ── */
   .loading-state {
     display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg);
+    z-index: 100;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 80vh;
-    text-align: center;
   }
   .loading-state.active { display: flex; }
 
-  .loader {
-    width: 3px;
-    height: 40px;
-    background: var(--accent);
-    animation: pulse 1s ease-in-out infinite;
-    margin-bottom: 32px;
+  .route-canvas {
+    width: 100%;
+    height: 70vh;
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.2; transform: scaleY(0.6); }
-    50% { opacity: 1; transform: scaleY(1); }
+
+  .route-path {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+
+  .route-path-progress {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+
+  .checkpoint-label {
+    font-family: 'Old Standard TT', serif;
+    font-size: 9px;
+    fill: var(--dim);
+    text-anchor: middle;
+  }
+
+  .rider-group .wheel-back { transform-origin: 12px 44px; animation: spin 0.5s linear infinite; }
+  .rider-group .wheel-front { transform-origin: 44px 44px; animation: spin 0.5s linear infinite; }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 
   .loading-status {
+    text-align: center;
     color: var(--dim);
-    font-size: 12px;
-    letter-spacing: 1px;
+    font-family: 'Old Standard TT', serif;
+    font-size: 13px;
+    font-style: italic;
+    letter-spacing: 0.5px;
+    margin-top: 16px;
   }
 
+  /* ── BRIEFING STATE ── */
   .briefing-state {
     display: none;
     animation: fadeUp 0.6s ease;
@@ -127,171 +179,264 @@
   .briefing-state.active { display: block; }
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .briefing-header {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 24px;
-    margin-bottom: 40px;
+    border-top: 4px double var(--headline);
+    border-bottom: 4px double var(--headline);
+    padding: 20px 0;
+    margin-bottom: 32px;
+    text-align: center;
   }
 
   .briefing-date {
-    font-size: 11px;
-    color: var(--accent);
+    font-family: 'Old Standard TT', serif;
+    font-size: 12px;
+    color: var(--dim);
     letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 8px;
   }
 
   .briefing-title {
-    font-family: 'Instrument Serif', serif;
-    font-size: 36px;
-    font-weight: 400;
-    letter-spacing: -0.5px;
+    font-family: 'UnifrakturCook', 'Playfair Display', serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--headline);
+    letter-spacing: 2px;
+    line-height: 1.1;
   }
 
   .briefing-meta {
-    margin-top: 12px;
+    margin-top: 10px;
     color: var(--dim);
+    font-family: 'Old Standard TT', serif;
     font-size: 11px;
+    font-style: italic;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── CONTENT ── */
+  .section-content {
+    column-count: 2;
+    column-gap: 40px;
+    column-rule: 1px solid var(--rule);
+  }
+
+  @media (max-width: 700px) {
+    .section-content { column-count: 1; }
   }
 
   .section-content h2 {
-    font-family: 'Instrument Serif', serif;
-    font-size: 24px;
-    font-weight: 400;
-    margin-top: 40px;
-    margin-bottom: 16px;
-    color: var(--fg);
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--headline);
+    column-span: all;
+    margin-top: 28px;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--headline);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
   }
 
+  .section-content h2:first-child { margin-top: 0; }
+
   .section-content h3 {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--accent);
-    text-transform: uppercase;
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--subhead);
+    font-variant: small-caps;
     letter-spacing: 1px;
-    margin-top: 28px;
-    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    text-transform: none;
   }
 
   .section-content p {
-    margin-bottom: 14px;
-    color: #c4c0b8;
+    margin-bottom: 12px;
+    text-align: justify;
+    hyphens: auto;
+    color: var(--fg);
   }
 
   .section-content ul {
     list-style: none;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   .section-content li {
-    padding-left: 16px;
+    padding-left: 18px;
     position: relative;
-    margin-bottom: 8px;
-    color: #c4c0b8;
+    margin-bottom: 6px;
+    text-align: justify;
+    color: var(--fg);
   }
 
   .section-content li::before {
-    content: '›';
+    content: '\2014';
     position: absolute;
     left: 0;
-    color: var(--accent);
+    color: var(--rule-dark);
+    font-size: 12px;
   }
 
-  .section-content strong { color: var(--fg); font-weight: 500; }
-  .section-content em { color: var(--amber); font-style: normal; }
+  .section-content strong { color: var(--headline); font-weight: 700; }
+  .section-content em { color: var(--fg); font-style: italic; }
 
-  .country-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-    margin-top: 48px;
-    padding-top: 40px;
-    border-top: 1px solid var(--border);
+  /* ── CITATIONS ── */
+  sup.cite {
+    font-size: 12px;
+    vertical-align: super;
+    line-height: 0;
   }
 
-  @media (max-width: 700px) {
-    .country-grid { grid-template-columns: 1fr; }
+  sup.cite a {
+    color: var(--cite);
+    text-decoration: none;
   }
 
-  .country-col {
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    padding: 28px;
-  }
+  sup.cite a:hover { text-decoration: underline; }
 
-  .country-col-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .country-flag { font-size: 24px; line-height: 1; }
-
-  .country-name {
-    font-family: 'Instrument Serif', serif;
-    font-size: 22px;
-    font-weight: 400;
-  }
-
-  .col-nl .country-name { color: var(--nl-accent); }
-  .col-hr .country-name { color: var(--hr-accent); }
-  .col-nl .section-content h3 { color: var(--nl-accent); }
-  .col-hr .section-content h3 { color: var(--hr-accent); }
-  .col-nl .section-content li::before { color: var(--nl-accent); }
-  .col-hr .section-content li::before { color: var(--hr-accent); }
-
-  .country-col .section-content h2 { font-size: 18px; margin-top: 24px; margin-bottom: 12px; }
-  .country-col .section-content h3 { font-size: 11px; margin-top: 20px; }
-  .country-col .section-content p,
-  .country-col .section-content li { font-size: 13px; }
-
+  /* ── RESET BUTTON ── */
   .reset-btn {
-    margin-top: 48px;
-    padding: 12px 24px;
+    margin-top: 40px;
+    padding: 10px 20px;
     background: transparent;
-    border: 1px solid var(--border);
+    border: 1px solid var(--rule-dark);
     color: var(--dim);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-family: 'Old Standard TT', serif;
+    font-size: 12px;
     cursor: pointer;
     letter-spacing: 1px;
     text-transform: uppercase;
     transition: all 0.2s;
   }
-  .reset-btn:hover { border-color: var(--fg); color: var(--fg); }
+  .reset-btn:hover { border-color: var(--headline); color: var(--headline); }
+
+  /* ── ERROR ── */
+  .transition-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg);
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .transition-overlay.active { display: flex; }
+
+  .transition-rule {
+    width: 0;
+    height: 2px;
+    background: var(--headline);
+    animation: ruleExpand 0.5s ease-out forwards;
+  }
+
+  @keyframes ruleExpand {
+    0% { width: 0; }
+    100% { width: 240px; }
+  }
 
   .error-msg {
     color: var(--red);
-    font-size: 12px;
+    font-family: 'Old Standard TT', serif;
+    font-size: 13px;
+    font-style: italic;
     margin-top: 16px;
     display: none;
   }
   .error-msg.visible { display: block; }
+
+  .error-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+  }
+  .error-state.active { display: flex; }
+
+  .missing-poster {
+    margin-bottom: 28px;
+    padding: 6px;
+    background: var(--bg);
+    border: 2px solid var(--fg);
+    box-shadow: 2px 3px 0 var(--rule-dark);
+    transform: rotate(-1.5deg);
+  }
+
+  .poster-inner {
+    border: 1px solid var(--rule-dark);
+    padding: 20px 28px 16px;
+    text-align: center;
+  }
+
+  .poster-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: var(--headline);
+    margin-bottom: 12px;
+  }
+
+  .poster-sketch {
+    width: 100px;
+    height: 112px;
+    margin-bottom: 10px;
+  }
+
+  .poster-label {
+    font-family: 'Old Standard TT', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }
+
+  .poster-sub {
+    font-family: 'Old Standard TT', serif;
+    font-size: 11px;
+    font-style: italic;
+    color: var(--dim);
+  }
+
+  .error-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-style: italic;
+    color: var(--fg);
+    max-width: 480px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
 <div class="noise"></div>
+<div class="transition-overlay" id="transitionOverlay">
+  <div class="transition-rule"></div>
+</div>
 <div class="container">
 
   <div class="launch-state" id="launchState">
-    <h1 class="title">Daily Briefing</h1>
-    <p class="subtitle">Reddit · News · Aggregated</p>
-    <button class="generate-btn" id="generateBtn" onclick="generate()">Generate Briefing</button>
+    <div class="masthead">
+      <h1 class="title">Daily Briefing</h1>
+      <div class="masthead-date" id="mastheadDate"></div>
+    </div>
+    <button class="generate-btn" id="generateBtn" onclick="generate()">Print Edition</button>
     <div class="error-msg" id="errorMsg"></div>
   </div>
 
   <div class="loading-state" id="loadingState">
-    <div class="loader"></div>
-    <div class="loading-status" id="loadingStatus">Pulling feeds...</div>
+    <svg class="route-canvas" id="routeCanvas" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="loading-status" id="loadingStatus">Delivering your edition...</div>
   </div>
 
   <div class="briefing-state" id="briefingState">
@@ -301,31 +446,55 @@
       <div class="briefing-meta" id="briefingMeta"></div>
     </div>
     <div class="section-content" id="mainBriefing"></div>
-    <div class="country-grid">
-      <div class="country-col col-nl">
-        <div class="country-col-header">
-          <span class="country-flag">🇳🇱</span>
-          <span class="country-name">Netherlands</span>
-        </div>
-        <div class="section-content" id="nlBriefing"><p style="color:var(--dim)">Generating...</p></div>
-      </div>
-      <div class="country-col col-hr">
-        <div class="country-col-header">
-          <span class="country-flag">🇭🇷</span>
-          <span class="country-name">Croatia</span>
-        </div>
-        <div class="section-content" id="hrBriefing"><p style="color:var(--dim)">Generating...</p></div>
+    <div class="section-content" id="sourcePanel"></div>
+    <button class="reset-btn" onclick="reset()">&#8592; New Edition</button>
+  </div>
+
+  <div class="error-state" id="errorState">
+    <div class="missing-poster">
+      <div class="poster-inner">
+        <div class="poster-title">MISSING</div>
+        <svg class="poster-sketch" viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- head -->
+          <circle cx="40" cy="24" r="14" stroke="#1a1a1a" stroke-width="1.5" fill="none"/>
+          <!-- cap -->
+          <path d="M26 21 Q40 12 54 21" stroke="#1a1a1a" stroke-width="1.5" fill="#1a1a1a"/>
+          <line x1="24" y1="21" x2="56" y2="21" stroke="#1a1a1a" stroke-width="1.5"/>
+          <!-- eyes -->
+          <circle cx="34" cy="26" r="1.5" fill="#1a1a1a"/>
+          <circle cx="46" cy="26" r="1.5" fill="#1a1a1a"/>
+          <!-- mouth -->
+          <path d="M36 32 Q40 35 44 32" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+          <!-- body -->
+          <line x1="40" y1="38" x2="40" y2="60" stroke="#1a1a1a" stroke-width="1.5"/>
+          <!-- arms -->
+          <line x1="40" y1="46" x2="28" y2="54" stroke="#1a1a1a" stroke-width="1.5"/>
+          <line x1="40" y1="46" x2="52" y2="54" stroke="#1a1a1a" stroke-width="1.5"/>
+          <!-- newspaper in hand -->
+          <rect x="50" y="50" width="10" height="7" rx="1" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+          <line x1="52" y1="53" x2="58" y2="53" stroke="#1a1a1a" stroke-width="0.6"/>
+          <line x1="52" y1="55" x2="58" y2="55" stroke="#1a1a1a" stroke-width="0.6"/>
+          <!-- legs -->
+          <line x1="40" y1="60" x2="30" y2="78" stroke="#1a1a1a" stroke-width="1.5"/>
+          <line x1="40" y1="60" x2="50" y2="78" stroke="#1a1a1a" stroke-width="1.5"/>
+        </svg>
+        <div class="poster-label">Newspaper Boy</div>
+        <div class="poster-sub">Last seen: delivering your edition</div>
       </div>
     </div>
-    <button class="reset-btn" onclick="reset()">&#8592; Generate Another</button>
+    <p class="error-headline" id="errorHeadline"></p>
+    <button class="reset-btn" onclick="reset()" style="margin-top:32px;">&#8592; Try Again</button>
   </div>
 
 </div>
 
 <script>
-const SUBS_GLOBAL = ['worldnews', 'technology', 'LocalLLaMA', 'economics', 'geopolitics', 'europe'];
-const SUBS_NL = ['thenetherlands', 'amsterdam'];
-const SUBS_HR = ['croatia', 'zagreb'];
+const SUBS = ['worldnews', 'technology', 'LocalLLaMA', 'economics', 'geopolitics', 'europe'];
+
+// ── SET MASTHEAD DATE ──
+document.getElementById('mastheadDate').textContent = new Date().toLocaleDateString('en-US', {
+  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
 
 // ── FETCH VIA LOCAL PROXY ──
 async function fetchReddit(subreddits, limit = 20) {
@@ -341,6 +510,7 @@ async function fetchReddit(subreddits, limit = 20) {
         posts.push({
           source: `r/${sub}`,
           title: d.title,
+          url: d.url || `https://reddit.com${d.permalink}`,
           score: d.score,
           comments: d.num_comments,
           selftext: (d.selftext || '').slice(0, 300),
@@ -364,10 +534,29 @@ async function fetchNews(params) {
     return (data.articles || []).map(a => ({
       source: a.source?.name || 'News',
       title: a.title,
+      url: a.url || '',
       description: (a.description || '').slice(0, 200),
     }));
   } catch (e) {
     console.warn('News fetch failed:', e);
+    return [];
+  }
+}
+
+async function fetchHackerNews(limit = 15) {
+  try {
+    const res = await fetch(`/api/hackernews?limit=${limit}`);
+    if (!res.ok) return [];
+    const items = await res.json();
+    return items.map(i => ({
+      source: 'Hacker News',
+      title: i.title,
+      url: i.url,
+      score: i.score,
+      comments: i.descendants || 0,
+    }));
+  } catch (e) {
+    console.warn('HN fetch failed:', e);
     return [];
   }
 }
@@ -391,18 +580,6 @@ async function callLLM(systemPrompt, userPrompt) {
   return data.choices[0].message.content;
 }
 
-function fmtReddit(posts) {
-  return posts.map(p =>
-    `[${p.source}] (score:${p.score}, comments:${p.comments}) ${p.title}${p.selftext ? '\n' + p.selftext : ''}`
-  ).join('\n\n');
-}
-
-function fmtNews(articles) {
-  return articles.map(a =>
-    `[${a.source}] ${a.title}${a.description ? ' — ' + a.description : ''}`
-  ).join('\n\n');
-}
-
 const MAIN_SYSTEM = `You are a daily intelligence briefing generator. Concise, high-signal.
 
 RULES:
@@ -410,22 +587,10 @@ RULES:
 - NO personal stories, celebrity gossip, lifestyle, fluff.
 - NO individual opinions. Aggregate sentiment as directional vibes.
 - Markdown: ## for sections, ### for subsections, bullet points for items.
-- Sections (skip if empty): Geopolitics & Conflict, Economy & Markets, AI & Technology, Science, Policy & Regulation, Vibe Check.
-- Terse. Every sentence carries information. No preambles, no sign-offs.
-- "Vibe Check" at the end: overall Reddit community mood on notable topics.`;
+- Sections (skip if empty): Geopolitics & Conflict, Economy & Markets, AI & Technology, Science, Policy & Regulation.
+- Terse. Every sentence carries information. No preambles, no sign-offs.`;
 
-const COUNTRY_SYSTEM = `You are a local news briefing generator for a specific country. Concise, high-signal.
-
-RULES:
-- Report notable local developments: politics, economy, policy, major incidents, society.
-- Translate all non-English headlines to English.
-- NO fluff, celebrity gossip, or sports unless major national event.
-- Aggregate sentiment as vibes where applicable.
-- Markdown: ### for subsections, bullet points. No ## headers.
-- Brief — sidebar column, not main briefing. 5-10 bullet points max.
-- No preambles, no sign-offs.`;
-
-function md(text) {
+function md(text, sourceIndex) {
   let html = text
     .replace(/```[\s\S]*?```/g, '')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -435,6 +600,19 @@ function md(text) {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
   html = html.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+  // Convert [N] citations to superscript links that open the source URL
+  if (sourceIndex) {
+    html = html.replace(/\[(\d+(?:,\s*\d+)*)\]/g, (match, nums) => {
+      const links = nums.split(/,\s*/).map(n => {
+        const idx = parseInt(n) - 1;
+        if (idx >= 0 && idx < sourceIndex.length && sourceIndex[idx].url) {
+          return `<a href="${sourceIndex[idx].url}" target="_blank" rel="noopener" title="${sourceIndex[idx].title}">${n}</a>`;
+        }
+        return n;
+      });
+      return `<sup class="cite">[${links.join(', ')}]</sup>`;
+    });
+  }
   html = html.split('\n\n').map(block => {
     block = block.trim();
     if (!block) return '';
@@ -442,6 +620,284 @@ function md(text) {
     return `<p>${block.replace(/\n/g, '<br>')}</p>`;
   }).join('\n');
   return html;
+}
+
+function renderSourceList(sourceIndex) {
+  if (!sourceIndex || sourceIndex.length === 0) return '';
+  const items = sourceIndex.map((s, i) => {
+    const num = i + 1;
+    const link = s.url
+      ? `<a href="${s.url}" target="_blank" rel="noopener">${s.title}</a>`
+      : s.title;
+    return `<li id="src-${num}"><span class="src-num">${num}</span><span class="src-tag">${s.source}</span>${link}</li>`;
+  }).join('\n');
+  return `<h2>Sources</h2><ol class="source-list">${items}</ol>`;
+}
+
+async function callLLMWithRetry(system, user, maxRetries = 2) {
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      return await callLLM(system, user);
+    } catch (e) {
+      if (i === maxRetries || !e.message.includes('429')) throw e;
+      setStatus(`Rate limited, retrying in ${(i + 1) * 5}s...`);
+      await new Promise(r => setTimeout(r, (i + 1) * 5000));
+    }
+  }
+}
+
+// ── ROUTE SYSTEM ──
+const LANDMARKS = [
+  { name: 'House', draw: () => `
+    <rect x="-14" y="-22" width="28" height="22" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <polygon points="-18,-22 0,-36 18,-22" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <rect x="-4" y="-12" width="8" height="12" stroke="#1a1a1a" stroke-width="0.8" fill="var(--bg)"/>
+  `},
+  { name: 'Mansion', draw: () => `
+    <rect x="-22" y="-26" width="44" height="26" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <polygon points="-26,-26 0,-40 26,-26" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <line x1="-14" y1="0" x2="-14" y2="-22" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="-8" y1="0" x2="-8" y2="-22" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="8" y1="0" x2="8" y2="-22" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="14" y1="0" x2="14" y2="-22" stroke="#1a1a1a" stroke-width="1"/>
+    <rect x="-4" y="-14" width="8" height="14" stroke="#1a1a1a" stroke-width="0.8" fill="var(--bg)"/>
+  `},
+  { name: 'Skyscraper', draw: () => `
+    <rect x="-10" y="-55" width="20" height="55" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <rect x="-6" y="-60" width="12" height="8" stroke="#1a1a1a" stroke-width="1" fill="var(--bg)"/>
+    <line x1="0" y1="-60" x2="0" y2="-65" stroke="#1a1a1a" stroke-width="1"/>
+    <rect x="-6" y="-50" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="2" y="-50" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="-6" y="-40" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="2" y="-40" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="-6" y="-30" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="2" y="-30" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="-6" y="-20" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="2" y="-20" width="4" height="3" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+  `},
+  { name: 'Tree', draw: () => `
+    <line x1="0" y1="0" x2="0" y2="-20" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="0" cy="-30" r="14" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+  `},
+  { name: 'Dog', draw: () => `
+    <ellipse cx="0" cy="-10" rx="10" ry="7" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <circle cx="12" cy="-16" r="5" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <circle cx="14" cy="-17" r="1" fill="#1a1a1a"/>
+    <line x1="-8" y1="-3" x2="-8" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="-3" y1="-3" x2="-3" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="4" y1="-3" x2="4" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="8" y1="-3" x2="8" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+    <path d="M-10,-9 Q-16,-6 -12,-2" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+  `},
+  { name: 'Mailbox', draw: () => `
+    <line x1="0" y1="0" x2="0" y2="-22" stroke="#1a1a1a" stroke-width="1.5"/>
+    <rect x="-7" y="-32" width="14" height="10" rx="2" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <line x1="-4" y1="-27" x2="4" y2="-27" stroke="#1a1a1a" stroke-width="0.8"/>
+    <line x1="7" y1="-29" x2="12" y2="-29" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  `},
+  { name: 'Hydrant', draw: () => `
+    <rect x="-5" y="-18" width="10" height="18" rx="2" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <ellipse cx="0" cy="-18" rx="6" ry="3" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <line x1="-8" y1="-10" x2="8" y2="-10" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="-7" y="-3" width="14" height="3" stroke="#1a1a1a" stroke-width="1" fill="var(--bg)"/>
+  `},
+  { name: 'Church', draw: () => `
+    <rect x="-16" y="-28" width="32" height="28" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <polygon points="-16,-28 0,-44 16,-28" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <rect x="-3" y="-52" width="6" height="12" stroke="#1a1a1a" stroke-width="1" fill="var(--bg)"/>
+    <line x1="0" y1="-56" x2="0" y2="-52" stroke="#1a1a1a" stroke-width="1.2"/>
+    <line x1="-3" y1="-54" x2="3" y2="-54" stroke="#1a1a1a" stroke-width="1.2"/>
+    <rect x="-4" y="-14" width="8" height="14" stroke="#1a1a1a" stroke-width="0.8" fill="var(--bg)"/>
+    <circle cx="0" cy="-32" r="3" stroke="#1a1a1a" stroke-width="0.8" fill="none"/>
+  `},
+  { name: 'Apartment', draw: () => `
+    <rect x="-14" y="-42" width="28" height="42" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+    <rect x="-10" y="-38" width="6" height="5" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="4" y="-38" width="6" height="5" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="-10" y="-28" width="6" height="5" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="4" y="-28" width="6" height="5" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="-10" y="-18" width="6" height="5" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="4" y="-18" width="6" height="5" stroke="#1a1a1a" stroke-width="0.6" fill="none"/>
+    <rect x="-3" y="-10" width="6" height="10" stroke="#1a1a1a" stroke-width="0.8" fill="var(--bg)"/>
+  `},
+  { name: 'Bench', draw: () => `
+    <line x1="-14" y1="-8" x2="14" y2="-8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-14" y1="-8" x2="-14" y2="-16" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="14" y1="-8" x2="14" y2="-16" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="-14" y1="-16" x2="14" y2="-16" stroke="#1a1a1a" stroke-width="1.2"/>
+    <line x1="-10" y1="-8" x2="-12" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="10" y1="-8" x2="12" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+  `},
+];
+
+const BIKE_SVG = `
+  <g class="wheel-back">
+    <circle cx="12" cy="44" r="9" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+    <line x1="12" y1="35" x2="12" y2="53" stroke="#1a1a1a" stroke-width="0.8"/>
+    <line x1="3" y1="44" x2="21" y2="44" stroke="#1a1a1a" stroke-width="0.8"/>
+  </g>
+  <g class="wheel-front">
+    <circle cx="44" cy="44" r="9" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+    <line x1="44" y1="35" x2="44" y2="53" stroke="#1a1a1a" stroke-width="0.8"/>
+    <line x1="35" y1="44" x2="53" y2="44" stroke="#1a1a1a" stroke-width="0.8"/>
+  </g>
+  <line x1="12" y1="44" x2="28" y2="30" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="28" y1="30" x2="44" y2="44" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="28" y1="30" x2="38" y2="30" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="12" y1="44" x2="24" y2="30" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="38" y1="26" x2="38" y2="33" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="35" y1="26" x2="41" y2="26" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="28" x2="30" y2="28" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="27" y1="28" x2="32" y2="16" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="32" y1="18" x2="38" y2="26" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="33" cy="12" r="4" stroke="#1a1a1a" stroke-width="1.5" fill="var(--bg)"/>
+  <path d="M29 11 Q33 7 37 11" stroke="#1a1a1a" stroke-width="1.5" fill="#1a1a1a"/>
+  <rect x="18" y="18" width="8" height="6" rx="1" stroke="#1a1a1a" stroke-width="1.2" fill="var(--bg)"/>
+  <line x1="20" y1="20" x2="24" y2="20" stroke="#1a1a1a" stroke-width="0.8"/>
+  <line x1="20" y1="22" x2="24" y2="22" stroke="#1a1a1a" stroke-width="0.8"/>
+  <line x1="22" y1="18" x2="30" y2="20" stroke="#1a1a1a" stroke-width="1"/>
+`;
+
+let routeState = null;
+
+function buildRoute() {
+  const svg = document.getElementById('routeCanvas');
+  const numCP = 4 + Math.floor(Math.random() * 4);
+  const start = { x: 60, y: 440 };
+  const end = { x: 840, y: 60 };
+  const checkpoints = [start];
+
+  // Generate truly random intermediate points anywhere on the canvas,
+  // then sort by a wandering metric so the path zigzags unpredictably
+  const candidates = [];
+  for (let i = 0; i < numCP - 2; i++) {
+    candidates.push({
+      x: 80 + Math.random() * 740,
+      y: 70 + Math.random() * 370,
+    });
+  }
+  // Sort by angle from start to create a winding path instead of a straight line
+  const cx = 450, cy = 250;
+  const startAngle = Math.atan2(start.y - cy, start.x - cx);
+  candidates.sort((a, b) => {
+    const aa = (Math.atan2(a.y - cy, a.x - cx) - startAngle + Math.PI * 3) % (Math.PI * 2);
+    const ba = (Math.atan2(b.y - cy, b.x - cx) - startAngle + Math.PI * 3) % (Math.PI * 2);
+    return aa - ba;
+  });
+  checkpoints.push(...candidates);
+  checkpoints.push(end);
+
+  // Shuffle landmarks
+  const pool = [...LANDMARKS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  const pathD = checkpoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+  let s = '';
+  // Faded route path
+  s += `<path class="route-path" d="${pathD}"/>`;
+  // Progress path (animated)
+  s += `<path class="route-path-progress" id="routeProgress" d="M ${start.x} ${start.y}"/>`;
+  // Checkpoint dots + landmarks
+  checkpoints.forEach((p, i) => {
+    const lm = pool[i % pool.length];
+    s += `<g transform="translate(${p.x}, ${p.y})">${lm.draw()}</g>`;
+    s += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--dim)" opacity="0.4"/>`;
+  });
+  // Rider
+  s += `<g class="rider-group" id="routeRider" transform="translate(${start.x}, ${start.y})">`;
+  s += `<g id="routeRiderInner" transform="scale(0.9) translate(-28, -48)">${BIKE_SVG}</g>`;
+  s += `</g>`;
+
+  svg.innerHTML = s;
+  return checkpoints;
+}
+
+function startDelivery(checkpoints) {
+  const rider = document.getElementById('routeRider');
+  const riderInner = document.getElementById('routeRiderInner');
+  const progress = document.getElementById('routeProgress');
+
+  let totalLen = 0;
+  const segLens = [];
+  for (let i = 1; i < checkpoints.length; i++) {
+    const dx = checkpoints[i].x - checkpoints[i - 1].x;
+    const dy = checkpoints[i].y - checkpoints[i - 1].y;
+    segLens.push(Math.sqrt(dx * dx + dy * dy));
+    totalLen += segLens[segLens.length - 1];
+  }
+
+  const duration = 18000;
+  const startTime = performance.now();
+  routeState = { checkpoints, segLens, totalLen, duration, startTime, rider, riderInner, progress, done: false, rafId: null };
+
+  function animate(now) {
+    if (routeState.done) return;
+    const elapsed = now - routeState.startTime;
+    const t = (elapsed % duration) / duration;
+    const targetDist = t * totalLen;
+
+    let pos = checkpoints[0];
+    let nextPos = checkpoints[1] || checkpoints[0];
+    let acc = 0;
+
+    for (let i = 0; i < segLens.length; i++) {
+      if (acc + segLens[i] >= targetDist) {
+        const segT = (targetDist - acc) / segLens[i];
+        const p0 = checkpoints[i];
+        const p1 = checkpoints[i + 1];
+        pos = { x: p0.x + (p1.x - p0.x) * segT, y: p0.y + (p1.y - p0.y) * segT };
+        nextPos = p1;
+        break;
+      }
+      acc += segLens[i];
+      pos = checkpoints[i + 1];
+      nextPos = checkpoints[Math.min(i + 2, checkpoints.length - 1)];
+    }
+
+    const dx = nextPos.x - pos.x;
+    const flip = dx < 0 ? -0.9 : 0.9;
+    rider.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+    riderInner.setAttribute('transform', `scale(${flip}, 0.9) translate(-28, -48)`);
+
+    // Progress path
+    let pd = `M ${checkpoints[0].x} ${checkpoints[0].y}`;
+    acc = 0;
+    for (let i = 0; i < segLens.length; i++) {
+      if (acc + segLens[i] >= targetDist) {
+        const segT = (targetDist - acc) / segLens[i];
+        const p0 = checkpoints[i], p1 = checkpoints[i + 1];
+        pd += ` L ${p0.x + (p1.x - p0.x) * segT} ${p0.y + (p1.y - p0.y) * segT}`;
+        break;
+      }
+      pd += ` L ${checkpoints[i + 1].x} ${checkpoints[i + 1].y}`;
+      acc += segLens[i];
+    }
+    progress.setAttribute('d', pd);
+    routeState.rafId = requestAnimationFrame(animate);
+  }
+
+  routeState.rafId = requestAnimationFrame(animate);
+}
+
+function finishDelivery() {
+  if (!routeState) return;
+  routeState.done = true;
+  if (routeState.rafId) cancelAnimationFrame(routeState.rafId);
+  const last = routeState.checkpoints[routeState.checkpoints.length - 1];
+  routeState.rider.setAttribute('transform', `translate(${last.x}, ${last.y})`);
+  routeState.riderInner.setAttribute('transform', `scale(0.9) translate(-28, -48)`);
+  const fullD = routeState.checkpoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  routeState.progress.setAttribute('d', fullD);
+}
+
+function stopDelivery() {
+  if (!routeState) return;
+  routeState.done = true;
+  if (routeState.rafId) cancelAnimationFrame(routeState.rafId);
 }
 
 function setStatus(msg) { document.getElementById('loadingStatus').textContent = msg; }
@@ -455,28 +911,59 @@ async function generate() {
   document.getElementById('errorMsg').classList.remove('visible');
   document.getElementById('generateBtn').disabled = true;
   document.getElementById('launchState').classList.add('hidden');
+  const transition = document.getElementById('transitionOverlay');
+  transition.classList.add('active');
+  await new Promise(r => setTimeout(r, 500));
+  transition.classList.remove('active');
   document.getElementById('loadingState').classList.add('active');
 
+  const timeoutMsg = 'Newspaper boy got lost en route. Please let us know and we will find a replacement tomorrow.';
+  const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), 30000));
+
   try {
+    const route = buildRoute();
+    startDelivery(route);
     setStatus('Pulling all feeds...');
-    const [globalReddit, nlReddit, hrReddit, globalNews, nlNews, hrNews] = await Promise.all([
-      fetchReddit(SUBS_GLOBAL),
-      fetchReddit(SUBS_NL, 15),
-      fetchReddit(SUBS_HR, 15),
-      fetchNews({ language: 'en', pageSize: 25 }),
-      fetchNews({ country: 'nl', pageSize: 15 }),
-      fetchNews({ country: 'hr', pageSize: 15 }),
+    const results = await Promise.race([
+      Promise.allSettled([
+        fetchReddit(SUBS),
+        fetchNews({ language: 'en', pageSize: 25 }),
+        fetchHackerNews(15),
+      ]),
+      timeoutPromise,
     ]);
+    const sourceNames = ['Reddit', 'NewsAPI', 'Hacker News'];
+    const succeeded = [];
+    const failed = [];
+    const allResults = results.map((r, i) => {
+      if (r.status === 'fulfilled' && r.value.length > 0) {
+        succeeded.push(sourceNames[i]);
+        return r.value;
+      }
+      failed.push(sourceNames[i]);
+      return [];
+    });
+    const globalReddit = allResults[0];
+    const globalNews = allResults[1];
+    const hnPosts = allResults[2] || [];
 
-    const total = globalReddit.length + nlReddit.length + hrReddit.length +
-                  globalNews.length + nlNews.length + hrNews.length;
+    const total = globalReddit.length + globalNews.length + hnPosts.length;
+    if (total === 0) throw new Error('All sources failed. Check your API keys and try again.');
 
-    setStatus(`Analyzing ${total} items across 3 briefings...`);
+    // Build numbered source index
+    const sourceIndex = [];
+    for (const p of globalReddit) sourceIndex.push({ source: p.source, title: p.title, url: p.url });
+    for (const a of globalNews) sourceIndex.push({ source: a.source, title: a.title, url: a.url });
+    for (const h of hnPosts) sourceIndex.push({ source: h.source, title: h.title, url: h.url });
 
-    const [mainBriefing, nlBriefing, hrBriefing] = await Promise.all([
-      callLLM(MAIN_SYSTEM, `Generate today's briefing:\n\n=== REDDIT ===\n${fmtReddit(globalReddit) || 'No data.'}\n\n=== NEWS ===\n${fmtNews(globalNews) || 'No data.'}\n\nMarkdown now.`),
-      callLLM(COUNTRY_SYSTEM, `Netherlands local briefing:\n\n=== REDDIT ===\n${fmtReddit(nlReddit) || 'No data.'}\n\n=== DUTCH NEWS ===\n${fmtNews(nlNews) || 'No data.'}\n\nMarkdown now.`),
-      callLLM(COUNTRY_SYSTEM, `Croatia local briefing:\n\n=== REDDIT ===\n${fmtReddit(hrReddit) || 'No data.'}\n\n=== CROATIAN NEWS ===\n${fmtNews(hrNews) || 'No data.'}\n\nMarkdown now.`),
+    const numberedSources = sourceIndex.map((s, i) =>
+      `[${i + 1}] (${s.source}) ${s.title}`
+    ).join('\n');
+
+    setStatus('Delivering your edition...');
+    const mainBriefing = await Promise.race([
+      callLLMWithRetry(MAIN_SYSTEM, `Generate today's briefing. When referencing a specific source, cite its number like [1] or [2,3].\n\n=== NUMBERED SOURCES ===\n${numberedSources || 'No data.'}\n\nMarkdown now.`),
+      timeoutPromise,
     ]);
 
     const now = new Date();
@@ -484,27 +971,25 @@ async function generate() {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
     document.getElementById('briefingMeta').textContent =
-      `${total} sources · 3 briefings · generated ${now.toLocaleTimeString()}`;
-    document.getElementById('mainBriefing').innerHTML = md(mainBriefing);
-    document.getElementById('nlBriefing').innerHTML = md(nlBriefing);
-    document.getElementById('hrBriefing').innerHTML = md(hrBriefing);
+      `${total} sources (${succeeded.join(', ')})${failed.length ? ' // ' + failed.join(', ') + ' unavailable' : ''} // generated ${now.toLocaleTimeString()}`;
+    document.getElementById('mainBriefing').innerHTML = md(mainBriefing, sourceIndex);
 
+    finishDelivery();
     document.getElementById('loadingState').classList.remove('active');
     document.getElementById('briefingState').classList.add('active');
 
   } catch (e) {
     console.error(e);
+    stopDelivery();
     document.getElementById('loadingState').classList.remove('active');
-    document.getElementById('launchState').classList.remove('hidden');
-    document.getElementById('generateBtn').disabled = false;
-    showError(e.message);
+    document.getElementById('errorHeadline').textContent = e.message;
+    document.getElementById('errorState').classList.add('active');
   }
 }
 
 function reset() {
   document.getElementById('briefingState').classList.remove('active');
-  document.getElementById('nlBriefing').innerHTML = '<p style="color:var(--dim)">Generating...</p>';
-  document.getElementById('hrBriefing').innerHTML = '<p style="color:var(--dim)">Generating...</p>';
+  document.getElementById('errorState').classList.remove('active');
   document.getElementById('launchState').classList.remove('hidden');
   document.getElementById('generateBtn').disabled = false;
 }
