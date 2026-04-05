@@ -2,7 +2,7 @@
 
 A personal daily news briefing app that aggregates Reddit posts and news headlines, then uses an LLM to generate a concise intelligence-style briefing.
 
-Features a global briefing plus country-specific sections for the Netherlands and Croatia.
+Features a global briefing on geopolitics, economy & markets and AI & technology.
 
 ## Stack
 
