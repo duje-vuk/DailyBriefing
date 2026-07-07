@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -65,7 +67,7 @@
 
   .title {
     font-family: 'UnifrakturCook', 'Playfair Display', serif;
-    font-size: 72px;
+    font-size: clamp(40px, 9vw, 72px);
     font-weight: 700;
     color: var(--headline);
     letter-spacing: 2px;
@@ -202,7 +204,7 @@
 
   .briefing-title {
     font-family: 'UnifrakturCook', 'Playfair Display', serif;
-    font-size: 56px;
+    font-size: clamp(32px, 7vw, 56px);
     font-weight: 700;
     color: var(--headline);
     letter-spacing: 2px;
@@ -301,6 +303,46 @@
   }
 
   sup.cite a:hover { text-decoration: underline; }
+
+  /* ── SOURCE LIST ── */
+  #sourcePanel { margin-top: 32px; }
+
+  .source-list {
+    list-style: none;
+    font-size: 12.5px;
+    color: var(--fg);
+  }
+
+  .source-list li {
+    margin-bottom: 5px;
+    padding-left: 0;
+    break-inside: avoid;
+  }
+
+  .source-list li::before { content: none; }
+
+  .src-num {
+    display: inline-block;
+    min-width: 24px;
+    color: var(--dim);
+    font-weight: 700;
+  }
+
+  .src-tag {
+    display: inline-block;
+    margin-right: 8px;
+    color: var(--red);
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .source-list a {
+    color: var(--cite);
+    text-decoration: none;
+  }
+
+  .source-list a:hover { text-decoration: underline; }
 
   /* ── RESET BUTTON ── */
   .reset-btn {
@@ -501,7 +543,7 @@ async function fetchReddit(subreddits, limit = 20) {
   const posts = [];
   const fetches = subreddits.map(async (sub) => {
     try {
-      const res = await fetch(`/api/reddit/${sub}?limit=${limit}`);
+      const res = await fetch(`/api/reddit/${sub}?limit=${limit}`, { signal: AbortSignal.timeout(15000) });
       if (!res.ok) return;
       const data = await res.json();
       for (const child of (data?.data?.children || [])) {
@@ -528,7 +570,7 @@ async function fetchReddit(subreddits, limit = 20) {
 async function fetchNews(params) {
   try {
     const qs = new URLSearchParams(params).toString();
-    const res = await fetch(`/api/news?${qs}`);
+    const res = await fetch(`/api/news?${qs}`, { signal: AbortSignal.timeout(15000) });
     if (!res.ok) return [];
     const data = await res.json();
     return (data.articles || []).map(a => ({
@@ -545,7 +587,7 @@ async function fetchNews(params) {
 
 async function fetchHackerNews(limit = 15) {
   try {
-    const res = await fetch(`/api/hackernews?limit=${limit}`);
+    const res = await fetch(`/api/hackernews?limit=${limit}`, { signal: AbortSignal.timeout(15000) });
     if (!res.ok) return [];
     const items = await res.json();
     return items.map(i => ({
@@ -565,6 +607,7 @@ async function callLLM(systemPrompt, userPrompt) {
   const res = await fetch('/api/llm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(90000),
     body: JSON.stringify({
       messages: [
         { role: 'system', content: systemPrompt },
@@ -577,7 +620,9 @@ async function callLLM(systemPrompt, userPrompt) {
     throw new Error(`LLM error (${res.status}): ${err}`);
   }
   const data = await res.json();
-  return data.choices[0].message.content;
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) throw new Error('LLM returned an empty response.');
+  return content;
 }
 
 const MAIN_SYSTEM = `You are a daily intelligence briefing generator. Concise, high-signal.
@@ -590,8 +635,22 @@ RULES:
 - Sections (skip if empty): Geopolitics & Conflict, Economy & Markets, AI & Technology, Science, Policy & Regulation.
 - Terse. Every sentence carries information. No preambles, no sign-offs.`;
 
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeUrl(u) {
+  return typeof u === 'string' && /^https?:\/\//i.test(u) ? escapeHtml(u) : '';
+}
+
 function md(text, sourceIndex) {
-  let html = text
+  // Escape first: LLM output can echo raw HTML from scraped titles (XSS)
+  let html = escapeHtml(text)
     .replace(/```[\s\S]*?```/g, '')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -605,8 +664,10 @@ function md(text, sourceIndex) {
     html = html.replace(/\[(\d+(?:,\s*\d+)*)\]/g, (match, nums) => {
       const links = nums.split(/,\s*/).map(n => {
         const idx = parseInt(n) - 1;
-        if (idx >= 0 && idx < sourceIndex.length && sourceIndex[idx].url) {
-          return `<a href="${sourceIndex[idx].url}" target="_blank" rel="noopener" title="${sourceIndex[idx].title}">${n}</a>`;
+        const src = sourceIndex[idx];
+        const url = src ? safeUrl(src.url) : '';
+        if (url) {
+          return `<a href="${url}" target="_blank" rel="noopener" title="${escapeHtml(src.title)}">${n}</a>`;
         }
         return n;
       });
@@ -626,10 +687,12 @@ function renderSourceList(sourceIndex) {
   if (!sourceIndex || sourceIndex.length === 0) return '';
   const items = sourceIndex.map((s, i) => {
     const num = i + 1;
-    const link = s.url
-      ? `<a href="${s.url}" target="_blank" rel="noopener">${s.title}</a>`
-      : s.title;
-    return `<li id="src-${num}"><span class="src-num">${num}</span><span class="src-tag">${s.source}</span>${link}</li>`;
+    const url = safeUrl(s.url);
+    const title = escapeHtml(s.title);
+    const link = url
+      ? `<a href="${url}" target="_blank" rel="noopener">${title}</a>`
+      : title;
+    return `<li id="src-${num}"><span class="src-num">${num}</span><span class="src-tag">${escapeHtml(s.source)}</span>${link}</li>`;
   }).join('\n');
   return `<h2>Sources</h2><ol class="source-list">${items}</ol>`;
 }
@@ -907,6 +970,15 @@ function showError(msg) {
   el.classList.add('visible');
 }
 
+// Timeout that cleans up after itself — no dangling timers / late unhandled rejections
+function withTimeout(promise, ms, msg) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(msg)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 async function generate() {
   document.getElementById('errorMsg').classList.remove('visible');
   document.getElementById('generateBtn').disabled = true;
@@ -918,20 +990,18 @@ async function generate() {
   document.getElementById('loadingState').classList.add('active');
 
   const timeoutMsg = 'Newspaper boy got lost en route. Please let us know and we will find a replacement tomorrow.';
-  const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMsg)), 30000));
 
   try {
     const route = buildRoute();
     startDelivery(route);
     setStatus('Pulling all feeds...');
-    const results = await Promise.race([
+    const results = await withTimeout(
       Promise.allSettled([
         fetchReddit(SUBS),
         fetchNews({ language: 'en', pageSize: 25 }),
         fetchHackerNews(15),
       ]),
-      timeoutPromise,
-    ]);
+      20000, timeoutMsg);
     const sourceNames = ['Reddit', 'NewsAPI', 'Hacker News'];
     const succeeded = [];
     const failed = [];
@@ -961,10 +1031,9 @@ async function generate() {
     ).join('\n');
 
     setStatus('Delivering your edition...');
-    const mainBriefing = await Promise.race([
+    const mainBriefing = await withTimeout(
       callLLMWithRetry(MAIN_SYSTEM, `Generate today's briefing. When referencing a specific source, cite its number like [1] or [2,3].\n\n=== NUMBERED SOURCES ===\n${numberedSources || 'No data.'}\n\nMarkdown now.`),
-      timeoutPromise,
-    ]);
+      90000, timeoutMsg);
 
     const now = new Date();
     document.getElementById('briefingDate').textContent = now.toLocaleDateString('en-US', {
@@ -973,6 +1042,7 @@ async function generate() {
     document.getElementById('briefingMeta').textContent =
       `${total} sources (${succeeded.join(', ')})${failed.length ? ' // ' + failed.join(', ') + ' unavailable' : ''} // generated ${now.toLocaleTimeString()}`;
     document.getElementById('mainBriefing').innerHTML = md(mainBriefing, sourceIndex);
+    document.getElementById('sourcePanel').innerHTML = renderSourceList(sourceIndex);
 
     finishDelivery();
     document.getElementById('loadingState').classList.remove('active');
