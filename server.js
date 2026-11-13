@@ -2,14 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { newsFeeds, parseFeed } = require('./newsFeeds');
+const { cleanSources, buildBriefingMessages, readBriefingText, maxSources } = require('./briefing');
 
 const app = express();
 
 const port = process.env.PORT || 3000;
+const host = process.env.HOST || '127.0.0.1';
 const groqApiKey = process.env.GROQ_API_KEY;
+const groqModel = process.env.GROQ_MODEL || 'qwen/qwen3.6-27b';
 
 if (!groqApiKey) {
-  console.warn('  ! GROQ_API_KEY missing — /api/llm will fail');
+  console.warn('  ! GROQ_API_KEY missing — briefings will fail');
 }
 
 try {
@@ -242,51 +245,62 @@ app.get('/api/hackernews', async (req, res) => {
   });
 });
 
-app.post('/api/llm', async (req, res) => {
-  const body = req.body || {};
-  const messages = body.messages;
-  const model = body.model;
+async function askGroqForBriefing(messages) {
+  const startTime = Date.now();
+  const response = await fetchWithRetry(
+    'https://api.groq.com/openai/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqApiKey}`,
+      },
+      body: JSON.stringify({
+        model: groqModel,
+        messages: messages,
+        temperature: 0.3,
+        reasoning_effort: 'none',
+        max_tokens: 3000,
+      }),
+    },
+    { maxRetries: 2, timeout: 60000 }
+  );
 
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: 'messages array required' });
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.warn(`AI call 'briefing' failed (${response.status}): ${errorText.slice(0, 200)}`);
+    throw makeUpstreamError(`AI service error (${response.status})`, response.status);
   }
 
-  let chosenModel = 'qwen/qwen3.6-27b';
-  if (typeof model === 'string') {
-    chosenModel = model;
+  const groqReply = await response.json();
+  const secondsTaken = ((Date.now() - startTime) / 1000).toFixed(1);
+  const usage = groqReply.usage;
+  if (usage) {
+    console.log(`AI call 'briefing': ${secondsTaken}s, ${usage.prompt_tokens} prompt tokens, ${usage.completion_tokens} reply tokens`);
+  }
+
+  return groqReply;
+}
+
+app.post('/api/briefing', async (req, res) => {
+  const body = req.body || {};
+  const sources = cleanSources(body.sources);
+  if (!sources) {
+    return res.status(400).json({ error: `sources must be a list of 1-${maxSources} items` });
   }
 
   try {
-    const response = await fetchWithRetry(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${groqApiKey}`,
-        },
-        body: JSON.stringify({
-          model: chosenModel,
-          messages: messages,
-          temperature: 0.3,
-          reasoning_effort: 'none',
-          max_tokens: 3000,
-        }),
-      },
-      { maxRetries: 2, timeout: 60000 }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      return res.status(response.status).send(errorText);
+    const groqReply = await askGroqForBriefing(buildBriefingMessages(sources));
+    const briefing = readBriefingText(groqReply);
+    if (!briefing) {
+      return res.status(502).json({ error: 'The AI returned an empty briefing.' });
     }
-
-    res.json(await response.json());
+    res.json({ briefing: briefing });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message });
   }
 });
 
-app.listen(port, () => {
-  console.log(`\n  ✓ Daily Briefing running at http://localhost:${port}\n`);
+app.listen(port, host, () => {
+  console.log(`\n  ✓ Daily Briefing running at http://${host}:${port}\n`);
 });

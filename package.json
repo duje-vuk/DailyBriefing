@@ -2,7 +2,9 @@
   "name": "daily-briefing",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test tests/briefing.test.js tests/newsFeeds.test.js",
+    "eval": "node evals/runEvals.js"
   },
   "dependencies": {
     "compression": "^1.7.5",

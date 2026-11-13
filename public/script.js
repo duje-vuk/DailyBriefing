@@ -37,41 +37,25 @@ async function fetchHackerNews(limit = 15) {
   }
 }
 
-async function callLlm(systemPrompt, userPrompt) {
-  const response = await fetch('/api/llm', {
+async function requestBriefing(sourceList) {
+  const sources = sourceList.map((item) => ({ source: item.source, title: item.title }));
+
+  const response = await fetch('/api/briefing', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: AbortSignal.timeout(90000),
-    body: JSON.stringify({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-    }),
+    body: JSON.stringify({ sources: sources }),
   });
 
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`LLM error (${response.status}): ${errorText}`);
+    throw new Error(`LLM error (${response.status}): ${data.error || 'Request failed'}`);
   }
-
-  const llmData = await response.json();
-  const content = llmData?.choices?.[0]?.message?.content;
-  if (!content) {
+  if (!data.briefing) {
     throw new Error('LLM returned an empty response.');
   }
-  return content;
+  return data.briefing;
 }
-
-const briefingInstructions = `You are a daily intelligence briefing generator. Concise, high-signal.
-
-RULES:
-- ONLY major developments: geopolitics, economic shifts, AI/tech releases, policy changes, major incidents.
-- NO personal stories, celebrity gossip, lifestyle, fluff.
-- NO individual opinions. Aggregate sentiment as directional vibes.
-- Markdown: ## for sections, ### for subsections, bullet points for items.
-- Sections (skip if empty): Geopolitics & Conflict, Economy & Markets, AI & Technology, Science, Policy & Regulation.
-- Terse. Every sentence carries information. No preambles, no sign-offs.`;
 
 function escapeHtml(text) {
   return String(text)
@@ -169,10 +153,10 @@ function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function callLlmWithRetry(systemPrompt, userPrompt, maxRetries = 2) {
+async function requestBriefingWithRetry(sourceList, maxRetries = 2) {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await callLlm(systemPrompt, userPrompt);
+      return await requestBriefing(sourceList);
     } catch (error) {
       const isRateLimited = error.message.includes('429');
       if (attempt === maxRetries || !isRateLimited) {
@@ -464,14 +448,9 @@ async function generate() {
       throw new Error('All sources failed. Check your API keys and try again.');
     }
 
-    const numberedLines = sourceList.map((source, position) => `[${position + 1}] (${source.source}) ${source.title}`);
-    const numberedSources = numberedLines.join('\n');
-
-    const userPrompt = `Generate today's briefing. When referencing a specific source, cite its number like [1] or [2,3].\n\n=== NUMBERED SOURCES ===\n${numberedSources || 'No data.'}\n\nMarkdown now.`;
-
     setStatus('Delivering your edition...');
     const briefingText = await withTimeout(
-      callLlmWithRetry(briefingInstructions, userPrompt),
+      requestBriefingWithRetry(sourceList),
       90000,
       timeoutMessage
     );
