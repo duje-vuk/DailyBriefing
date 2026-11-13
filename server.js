@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const { newsFeeds, parseFeed } = require('./newsFeeds');
 
 const app = express();
 
@@ -170,27 +171,41 @@ function readTwoLetterCode(value) {
 app.use(express.json({ limit: '256kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/reddit/:subreddit', async (req, res) => {
-  const subreddit = req.params.subreddit;
-
-  const isValidName = /^[A-Za-z0-9_]{1,50}$/.test(subreddit);
-  if (!isValidName) {
-    return res.status(400).json({ error: 'Invalid subreddit name' });
+async function fetchOneFeed(feed, itemsPerFeed) {
+  const response = await fetchWithRetry(
+    feed.url,
+    { headers: { 'User-Agent': 'DailyBriefing/1.0' } },
+    { maxRetries: 1, timeout: 6000 }
+  );
+  if (!response.ok) {
+    throw makeUpstreamError(`${feed.name} feed error`, response.status);
   }
+  const xmlText = await response.text();
+  return parseFeed(xmlText, feed.name, itemsPerFeed);
+}
 
-  const limit = keepBetween(readInteger(req.query.limit, 20), 1, 100);
-  const cacheKey = `reddit:${subreddit.toLowerCase()}:${limit}`;
+app.get('/api/feeds', async (req, res) => {
+  const itemsPerFeed = keepBetween(readInteger(req.query.limit, 6), 1, 20);
+  const cacheKey = `feeds:${itemsPerFeed}`;
 
   await sendCachedJson(res, cacheKey, async () => {
-    const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`;
-    const response = await fetchWithRetry(url, {
-      headers: { 'User-Agent': 'DailyBriefing/1.0' },
+    const results = await Promise.allSettled(
+      newsFeeds.map((feed) => fetchOneFeed(feed, itemsPerFeed))
+    );
+
+    const allItems = [];
+    results.forEach((result, position) => {
+      if (result.status === 'fulfilled') {
+        allItems.push(...result.value);
+      } else {
+        console.warn(`${newsFeeds[position].name} feed failed:`, result.reason.message);
+      }
     });
 
-    if (!response.ok) {
-      throw makeUpstreamError('Reddit error', response.status);
+    if (allItems.length === 0) {
+      throw makeUpstreamError('All news feeds failed', 502);
     }
-    return response.json();
+    return allItems;
   });
 });
 

@@ -1,12 +1,12 @@
 # Daily Briefing
 
-A personal daily news briefing app that aggregates Reddit posts and news headlines, then uses an LLM to generate a concise intelligence-style briefing.
+A personal daily news briefing app that aggregates news feeds, headlines and Hacker News, then uses an LLM to generate a concise intelligence-style briefing.
 
 Features a global briefing on geopolitics, economy & markets and AI & technology.
 
 ## Stack
 
-- **Backend:** Node.js + Express (proxy for Reddit, NewsAPI, Groq)
+- **Backend:** Node.js + Express (proxy for news feeds, NewsAPI, Groq)
 - **Frontend:** Single-page HTML/CSS/JS
 - **LLM:** Groq API (Llama 3.3 70B)
 

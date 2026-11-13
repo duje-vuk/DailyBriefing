@@ -1,51 +1,18 @@
-const subreddits = ['worldnews', 'technology', 'LocalLLaMA', 'economics', 'geopolitics', 'europe'];
-
 const dateFormat = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
 document.getElementById('mastheadDate').textContent = new Date().toLocaleDateString('en-US', dateFormat);
 
-async function fetchSubreddit(subreddit, limit) {
-  const posts = [];
-
+async function fetchFeeds(itemsPerFeed = 6) {
   try {
-    const response = await fetch(`/api/reddit/${subreddit}?limit=${limit}`, { signal: AbortSignal.timeout(15000) });
+    const response = await fetch(`/api/feeds?limit=${itemsPerFeed}`, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) {
-      return posts;
+      return [];
     }
-
-    const redditData = await response.json();
-    const children = redditData?.data?.children || [];
-
-    for (const child of children) {
-      const post = child.data;
-      if (post.stickied) {
-        continue;
-      }
-
-      posts.push({
-        source: `r/${subreddit}`,
-        title: post.title,
-        url: post.url || `https://reddit.com${post.permalink}`,
-        score: post.score,
-        comments: post.num_comments,
-        previewText: (post.selftext || '').slice(0, 300),
-      });
-    }
+    return await response.json();
   } catch (error) {
-    console.warn(`r/${subreddit} failed:`, error);
+    console.warn('News feeds failed:', error);
+    return [];
   }
-
-  return posts;
-}
-
-async function fetchReddit(subredditList, limit = 20) {
-  const postsPerSubreddit = await Promise.all(
-    subredditList.map((subreddit) => fetchSubreddit(subreddit, limit))
-  );
-
-  const allPosts = postsPerSubreddit.flat();
-  allPosts.sort((first, second) => second.score - first.score);
-  return allPosts.slice(0, 50);
 }
 
 async function fetchNews(searchOptions) {
@@ -456,7 +423,7 @@ async function showLoadingScreen() {
 }
 
 function sortResults(results) {
-  const sourceNames = ['Reddit', 'NewsAPI', 'Hacker News'];
+  const sourceNames = ['News feeds', 'NewsAPI', 'Hacker News'];
   const succeeded = [];
   const failed = [];
   const itemsPerSource = [];
@@ -505,7 +472,7 @@ async function generate() {
     setStatus('Pulling all feeds...');
     const results = await withTimeout(
       Promise.allSettled([
-        fetchReddit(subreddits),
+        fetchFeeds(),
         fetchNews({ language: 'en', pageSize: 25 }),
         fetchHackerNews(15),
       ]),
