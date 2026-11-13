@@ -270,7 +270,7 @@ app.post('/api/llm', async (req, res) => {
     return res.status(400).json({ error: 'messages array required' });
   }
 
-  let chosenModel = 'llama-3.3-70b-versatile';
+  let chosenModel = 'qwen/qwen3.6-27b';
   if (typeof model === 'string') {
     chosenModel = model;
   }
@@ -288,6 +288,7 @@ app.post('/api/llm', async (req, res) => {
           model: chosenModel,
           messages: messages,
           temperature: 0.3,
+          reasoning_effort: 'none',
           max_tokens: 3000,
         }),
       },
