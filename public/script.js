@@ -2,7 +2,7 @@ const dateFormat = { weekday: 'long', year: 'numeric', month: 'long', day: 'nume
 
 document.getElementById('mastheadDate').textContent = new Date().toLocaleDateString('en-US', dateFormat);
 
-async function fetchFeeds(itemsPerFeed = 6) {
+async function fetchFeeds(itemsPerFeed = 8) {
   try {
     const response = await fetch(`/api/feeds?limit=${itemsPerFeed}`, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) {
@@ -11,29 +11,6 @@ async function fetchFeeds(itemsPerFeed = 6) {
     return await response.json();
   } catch (error) {
     console.warn('News feeds failed:', error);
-    return [];
-  }
-}
-
-async function fetchNews(searchOptions) {
-  try {
-    const queryString = new URLSearchParams(searchOptions).toString();
-    const response = await fetch(`/api/news?${queryString}`, { signal: AbortSignal.timeout(15000) });
-    if (!response.ok) {
-      return [];
-    }
-
-    const newsData = await response.json();
-    const articles = newsData.articles || [];
-
-    return articles.map((article) => ({
-      source: article.source?.name || 'News',
-      title: article.title,
-      url: article.url || '',
-      description: (article.description || '').slice(0, 200),
-    }));
-  } catch (error) {
-    console.warn('News fetch failed:', error);
     return [];
   }
 }
@@ -423,7 +400,7 @@ async function showLoadingScreen() {
 }
 
 function sortResults(results) {
-  const sourceNames = ['News feeds', 'NewsAPI', 'Hacker News'];
+  const sourceNames = ['News feeds', 'Hacker News'];
   const succeeded = [];
   const failed = [];
   const itemsPerSource = [];
@@ -473,7 +450,6 @@ async function generate() {
     const results = await withTimeout(
       Promise.allSettled([
         fetchFeeds(),
-        fetchNews({ language: 'en', pageSize: 25 }),
         fetchHackerNews(15),
       ]),
       20000,

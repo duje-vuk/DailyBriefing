@@ -7,13 +7,9 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 const groqApiKey = process.env.GROQ_API_KEY;
-const newsApiKey = process.env.NEWS_API_KEY;
 
 if (!groqApiKey) {
   console.warn('  ! GROQ_API_KEY missing — /api/llm will fail');
-}
-if (!newsApiKey) {
-  console.warn('  ! NEWS_API_KEY missing — /api/news will fail');
 }
 
 try {
@@ -161,13 +157,6 @@ function keepBetween(number, smallest, largest) {
   return Math.min(Math.max(number, smallest), largest);
 }
 
-function readTwoLetterCode(value) {
-  if (/^[a-z]{2}$/i.test(value || '')) {
-    return value.toLowerCase();
-  }
-  return '';
-}
-
 app.use(express.json({ limit: '256kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -206,29 +195,6 @@ app.get('/api/feeds', async (req, res) => {
       throw makeUpstreamError('All news feeds failed', 502);
     }
     return allItems;
-  });
-});
-
-app.get('/api/news', async (req, res) => {
-  const country = readTwoLetterCode(req.query.country);
-  const language = readTwoLetterCode(req.query.language);
-  const pageSize = keepBetween(readInteger(req.query.pageSize, 20), 1, 100);
-  const cacheKey = `news:${language}:${country}:${pageSize}`;
-
-  await sendCachedJson(res, cacheKey, async () => {
-    let url = `https://newsapi.org/v2/top-headlines?pageSize=${pageSize}&apiKey=${newsApiKey}`;
-    if (country) {
-      url += `&country=${country}`;
-    }
-    if (language) {
-      url += `&language=${language}`;
-    }
-
-    const response = await fetchWithRetry(url);
-    if (!response.ok) {
-      throw makeUpstreamError('NewsAPI error', response.status);
-    }
-    return response.json();
   });
 });
 

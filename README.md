@@ -6,7 +6,7 @@ Features a global briefing on geopolitics, economy & markets and AI & technology
 
 ## Stack
 
-- **Backend:** Node.js + Express (proxy for news feeds, NewsAPI, Groq)
+- **Backend:** Node.js + Express (proxy for news feeds, Hacker News, Groq)
 - **Frontend:** Single-page HTML/CSS/JS
 - **LLM:** Groq API (Llama 3.3 70B)
 
@@ -26,7 +26,6 @@ cp .env.example .env
 
 You'll need:
 - **Groq API key** from [console.groq.com](https://console.groq.com)
-- **NewsAPI key** from [newsapi.org](https://newsapi.org)
 
 ## Usage
 
