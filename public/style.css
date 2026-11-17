@@ -35,15 +35,14 @@ body {
   padding: 40px 32px;
 }
 
-.launch-state {
-  display: flex;
+.launch-state, .error-state {
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 80vh;
   text-align: center;
-  transition: opacity 0.5s ease;
 }
+.launch-state { display: flex; transition: opacity 0.5s ease; }
 .launch-state.hidden { display: none; }
 
 .masthead {
@@ -54,33 +53,20 @@ body {
   margin-bottom: 8px;
 }
 
-.title {
+.title, .briefing-title {
   font-family: 'UnifrakturCook', 'Playfair Display', serif;
-  font-size: clamp(40px, 9vw, 72px);
   font-weight: 700;
   color: var(--headline);
   letter-spacing: 2px;
-  line-height: 1;
 }
+.title { font-size: clamp(40px, 9vw, 72px); line-height: 1; }
 
 .masthead-date {
-  font-family: 'Old Standard TT', serif;
   font-size: 12px;
   color: var(--dim);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-top: 8px;
-}
-
-.subtitle {
-  color: var(--dim);
-  font-family: 'Old Standard TT', serif;
-  font-size: 12px;
-  letter-spacing: 2px;
-  border-bottom: 4px double var(--headline);
-  padding-bottom: 12px;
-  margin-bottom: 48px;
-  width: 100%;
 }
 
 .generate-btn {
@@ -122,26 +108,13 @@ body {
   height: 70vh;
 }
 
-.route-path {
+.route-path, .route-path-progress {
   fill: none;
-  stroke: var(--rule);
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
 }
-
-.route-path-progress {
-  fill: none;
-  stroke: var(--fg);
-  stroke-width: 1.5;
-  stroke-dasharray: 6 4;
-}
-
-.checkpoint-label {
-  font-family: 'Old Standard TT', serif;
-  font-size: 9px;
-  fill: var(--dim);
-  text-anchor: middle;
-}
+.route-path { stroke: var(--rule); }
+.route-path-progress { stroke: var(--fg); }
 
 .rider-group .wheel-back { transform-origin: 12px 44px; animation: spin 0.5s linear infinite; }
 .rider-group .wheel-front { transform-origin: 44px 44px; animation: spin 0.5s linear infinite; }
@@ -154,7 +127,6 @@ body {
 .loading-status {
   text-align: center;
   color: var(--dim);
-  font-family: 'Old Standard TT', serif;
   font-size: 13px;
   font-style: italic;
   letter-spacing: 0.5px;
@@ -181,7 +153,6 @@ body {
 }
 
 .briefing-date {
-  font-family: 'Old Standard TT', serif;
   font-size: 12px;
   color: var(--dim);
   letter-spacing: 3px;
@@ -189,19 +160,11 @@ body {
   margin-bottom: 8px;
 }
 
-.briefing-title {
-  font-family: 'UnifrakturCook', 'Playfair Display', serif;
-  font-size: clamp(32px, 7vw, 56px);
-  font-weight: 700;
-  color: var(--headline);
-  letter-spacing: 2px;
-  line-height: 1.1;
-}
+.briefing-title { font-size: clamp(32px, 7vw, 56px); line-height: 1.1; }
 
 .briefing-meta {
   margin-top: 10px;
   color: var(--dim);
-  font-family: 'Old Standard TT', serif;
   font-size: 11px;
   font-style: italic;
   letter-spacing: 0.5px;
@@ -282,12 +245,12 @@ sup.cite {
   line-height: 0;
 }
 
-sup.cite a {
+sup.cite a, .source-list a {
   color: var(--cite);
   text-decoration: none;
 }
 
-sup.cite a:hover { text-decoration: underline; }
+sup.cite a:hover, .source-list a:hover { text-decoration: underline; }
 
 #sourcePanel { margin-top: 32px; }
 
@@ -320,13 +283,6 @@ sup.cite a:hover { text-decoration: underline; }
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
-
-.source-list a {
-  color: var(--cite);
-  text-decoration: none;
-}
-
-.source-list a:hover { text-decoration: underline; }
 
 .reset-btn {
   margin-top: 40px;
@@ -367,24 +323,7 @@ sup.cite a:hover { text-decoration: underline; }
   100% { width: 240px; }
 }
 
-.error-msg {
-  color: var(--red);
-  font-family: 'Old Standard TT', serif;
-  font-size: 13px;
-  font-style: italic;
-  margin-top: 16px;
-  display: none;
-}
-.error-msg.visible { display: block; }
-
-.error-state {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  text-align: center;
-}
+.error-state { display: none; }
 .error-state.active { display: flex; }
 
 .missing-poster {
@@ -418,7 +357,6 @@ sup.cite a:hover { text-decoration: underline; }
 }
 
 .poster-label {
-  font-family: 'Old Standard TT', serif;
   font-size: 14px;
   font-weight: 700;
   color: var(--fg);
@@ -426,7 +364,6 @@ sup.cite a:hover { text-decoration: underline; }
 }
 
 .poster-sub {
-  font-family: 'Old Standard TT', serif;
   font-size: 11px;
   font-style: italic;
   color: var(--dim);

@@ -2,37 +2,15 @@ const dateFormat = { weekday: 'long', year: 'numeric', month: 'long', day: 'nume
 
 document.getElementById('mastheadDate').textContent = new Date().toLocaleDateString('en-US', dateFormat);
 
-async function fetchFeeds(itemsPerFeed = 8) {
+async function fetchSourceItems(url) {
   try {
-    const response = await fetch(`/api/feeds?limit=${itemsPerFeed}`, { signal: AbortSignal.timeout(15000) });
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) {
       return [];
     }
     return await response.json();
   } catch (error) {
-    console.warn('News feeds failed:', error);
-    return [];
-  }
-}
-
-async function fetchHackerNews(limit = 15) {
-  try {
-    const response = await fetch(`/api/hackernews?limit=${limit}`, { signal: AbortSignal.timeout(15000) });
-    if (!response.ok) {
-      return [];
-    }
-
-    const stories = await response.json();
-
-    return stories.map((story) => ({
-      source: 'Hacker News',
-      title: story.title,
-      url: story.url,
-      score: story.score,
-      comments: story.descendants || 0,
-    }));
-  } catch (error) {
-    console.warn('HN fetch failed:', error);
+    console.warn(`${url} failed:`, error);
     return [];
   }
 }
@@ -151,23 +129,6 @@ function renderSourceList(sourceList) {
 
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-async function requestBriefingWithRetry(sourceList, maxRetries = 2) {
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await requestBriefing(sourceList);
-    } catch (error) {
-      const isRateLimited = error.message.includes('429');
-      if (attempt === maxRetries || !isRateLimited) {
-        throw error;
-      }
-
-      const waitSeconds = (attempt + 1) * 5;
-      setStatus(`Rate limited, retrying in ${waitSeconds}s...`);
-      await wait(waitSeconds * 1000);
-    }
-  }
 }
 
 let routeState = null;
@@ -356,12 +317,6 @@ function setStatus(message) {
   document.getElementById('loadingStatus').textContent = message;
 }
 
-function showError(message) {
-  const errorElement = document.getElementById('errorMsg');
-  errorElement.textContent = message;
-  errorElement.classList.add('visible');
-}
-
 function withTimeout(promise, milliseconds, message) {
   let timer;
   const timeoutPromise = new Promise((resolve, reject) => {
@@ -371,7 +326,6 @@ function withTimeout(promise, milliseconds, message) {
 }
 
 async function showLoadingScreen() {
-  document.getElementById('errorMsg').classList.remove('visible');
   document.getElementById('generateBtn').disabled = true;
   document.getElementById('launchState').classList.add('hidden');
 
@@ -402,16 +356,6 @@ function sortResults(results) {
   return { succeeded, failed, itemsPerSource };
 }
 
-function buildSourceList(itemsPerSource) {
-  const sourceList = [];
-  for (const items of itemsPerSource) {
-    for (const item of items) {
-      sourceList.push({ source: item.source, title: item.title, url: item.url });
-    }
-  }
-  return sourceList;
-}
-
 function makeMetaText(total, succeeded, failed, now) {
   let metaText = `${total} sources (${succeeded.join(', ')})`;
   if (failed.length) {
@@ -433,15 +377,15 @@ async function generate() {
     setStatus('Pulling all feeds...');
     const results = await withTimeout(
       Promise.allSettled([
-        fetchFeeds(),
-        fetchHackerNews(15),
+        fetchSourceItems('/api/feeds?limit=8'),
+        fetchSourceItems('/api/hackernews?limit=15'),
       ]),
       20000,
       timeoutMessage
     );
 
     const { succeeded, failed, itemsPerSource } = sortResults(results);
-    const sourceList = buildSourceList(itemsPerSource);
+    const sourceList = itemsPerSource.flat();
     const total = sourceList.length;
 
     if (total === 0) {
@@ -450,7 +394,7 @@ async function generate() {
 
     setStatus('Delivering your edition...');
     const briefingText = await withTimeout(
-      requestBriefingWithRetry(sourceList),
+      requestBriefing(sourceList),
       90000,
       timeoutMessage
     );

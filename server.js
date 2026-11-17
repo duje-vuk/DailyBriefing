@@ -15,11 +15,7 @@ if (!groqApiKey) {
   console.warn('  ! GROQ_API_KEY missing — briefings will fail');
 }
 
-try {
-  const compression = require('compression');
-  app.use(compression());
-} catch {
-}
+app.use(require('compression')());
 
 const oneMinute = 60 * 1000;
 const cacheFreshTime = 30 * oneMinute;
@@ -233,12 +229,9 @@ app.get('/api/hackernews', async (req, res) => {
 
       const story = result.value;
       stories.push({
-        id: story.id,
+        source: 'Hacker News',
         title: story.title,
         url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
-        score: story.score,
-        by: story.by,
-        descendants: story.descendants || 0,
       });
     }
     return stories;
