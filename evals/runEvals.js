@@ -27,7 +27,7 @@ async function main() {
       'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: process.env.GROQ_MODEL || 'qwen/qwen3.6-27b',
+      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
       messages: buildBriefingMessages(sampleSources),
       temperature: 0.3,
       reasoning_effort: 'none',

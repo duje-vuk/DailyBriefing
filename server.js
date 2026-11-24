@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || '127.0.0.1';
 const groqApiKey = process.env.GROQ_API_KEY;
-const groqModel = process.env.GROQ_MODEL || 'qwen/qwen3.6-27b';
+const groqModel = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
 
 if (!groqApiKey) {
   console.warn('  ! GROQ_API_KEY missing — briefings will fail');
@@ -19,7 +19,7 @@ app.use(require('compression')());
 
 const oneMinute = 60 * 1000;
 const cacheFreshTime = 30 * oneMinute;
-const cacheStaleTime = 120 * oneMinute;
+const cacheMaxAge = 120 * oneMinute;
 const cacheMaxEntries = 200;
 
 const cache = new Map();
@@ -34,7 +34,7 @@ function getFromCache(key, allowStale = false) {
   if (age <= cacheFreshTime) {
     return entry.data;
   }
-  if (allowStale && age <= cacheStaleTime) {
+  if (allowStale && age <= cacheMaxAge) {
     return entry.data;
   }
   return null;
@@ -52,7 +52,7 @@ function saveToCache(key, data) {
 function removeOldCacheEntries() {
   const now = Date.now();
   for (const [key, entry] of cache) {
-    if (now - entry.savedAt > cacheStaleTime) {
+    if (now - entry.savedAt > cacheMaxAge) {
       cache.delete(key);
     }
   }

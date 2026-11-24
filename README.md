@@ -18,7 +18,7 @@ Add your **Groq API key** from [console.groq.com](https://console.groq.com) to `
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GROQ_API_KEY` | Yes | — | Your Groq API key |
-| `GROQ_MODEL` | No | `qwen/qwen3.6-27b` | Groq model to use |
+| `GROQ_MODEL` | No | `qwen/qwen3.8-27b` | Groq model to use |
 | `PORT` | No | `3000` | Server port |
 | `HOST` | No | `127.0.0.1` | Address to listen on |
 
@@ -75,7 +75,7 @@ Runs the real prompt on fixed sample headlines and checks the briefing: sections
 
 - **Backend:** Node.js + Express
 - **Frontend:** Vanilla HTML/CSS/JS in `public/`
-- **LLM:** Groq API (`qwen/qwen3.6-27b` by default)
+- **LLM:** Groq API (`qwen/qwen3.8-27b` by default)
 
 ## License
 
