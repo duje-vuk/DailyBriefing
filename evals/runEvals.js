@@ -26,25 +26,51 @@ const checkNames = [
   'Token budget',
 ];
 
-async function askGroq(messages, extraSettings = {}) {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: groqModel,
-      messages: messages,
-      reasoning_effort: 'none',
-      ...extraSettings,
-    }),
-  });
+const rateLimitWaitSeconds = 60;
+const maxRateLimitRetries = 3;
 
-  if (!response.ok) {
-    throw new Error(`Groq request failed (${response.status}): ${(await response.text()).slice(0, 200)}`);
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function readWaitSeconds(response) {
+  const retryAfterSeconds = Number(response.headers.get('retry-after'));
+  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+    return Math.ceil(retryAfterSeconds);
   }
-  return response.json();
+  return rateLimitWaitSeconds;
+}
+
+async function askGroq(messages, extraSettings = {}) {
+  for (let attempt = 0; attempt <= maxRateLimitRetries; attempt++) {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: groqModel,
+        messages: messages,
+        reasoning_effort: 'none',
+        ...extraSettings,
+      }),
+    });
+
+    const isRateLimited = response.status === 429;
+    const hasRetriesLeft = attempt < maxRateLimitRetries;
+    if (isRateLimited && hasRetriesLeft) {
+      const waitSeconds = readWaitSeconds(response);
+      console.log(`  Rate limited, waiting ${waitSeconds}s before retrying...`);
+      await wait(waitSeconds * 1000);
+      continue;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Groq request failed (${response.status}): ${(await response.text()).slice(0, 200)}`);
+    }
+    return response.json();
+  }
 }
 
 async function evaluateDay(day) {

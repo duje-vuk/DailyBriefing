@@ -18,7 +18,33 @@ function findBullets(briefing) {
   return briefing
     .split('\n')
     .map((line) => line.trim())
-    .filter((line) => /^[-*] /.test(line));
+    .filter((line) => /^([-*+]|\d+\.)\s+/.test(line));
+}
+
+function stripFormatting(text) {
+  return text
+    .replace(/^([-*+]|\d+\.)\s+/, '')
+    .replace(/^>\s*/, '')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/~~([^~]*)~~/g, '$1')
+    .replace(/(\*\*|__)(.+?)\1/g, '$2')
+    .replace(/(\*|_)(.+?)\1/g, '$2')
+    .trim();
+}
+
+function removeLeadingLabel(bulletText) {
+  const formattedLabel = /^\s*(\*\*|__|\*|_)[^*_]{1,60}?:?\1\s*:?\s*/;
+  if (formattedLabel.test(bulletText)) {
+    return bulletText.replace(formattedLabel, '');
+  }
+  const plainLabel = /^\s*([A-Z][\w&'-]*(\s+[\w&'-]+){0,3}):\s+/;
+  return bulletText.replace(plainLabel, '');
+}
+
+function cleanBulletText(bullet) {
+  const withoutMarker = bullet.trim().replace(/^([-*+]|\d+\.)\s+/, '');
+  return stripFormatting(removeLeadingLabel(withoutMarker));
 }
 
 function findSectionHeadings(briefing) {
@@ -120,14 +146,29 @@ function contentWords(text) {
   return words.filter((word) => word.length >= 3 && !stopWords.has(word));
 }
 
+function stem(word) {
+  const endings = ['ing', 'ies', 'ed', 'es', 'en', 'ly', 's'];
+  for (const ending of endings) {
+    if (word.endsWith(ending) && word.length - ending.length >= 3) {
+      return word.slice(0, word.length - ending.length);
+    }
+  }
+  return word;
+}
+
 function numbersIn(text) {
   const withoutCitations = text.replace(/\[[\d,\s]+\]/g, ' ');
   return withoutCitations.match(/\d+(?:[.,]\d+)?/g) || [];
 }
 
 function wordAppearsIn(word, sourceWords) {
-  const stem = word.slice(0, 5);
-  return sourceWords.some((sourceWord) => sourceWord === word || (stem.length === 5 && sourceWord.startsWith(stem)));
+  const wordStem = stem(word);
+  return sourceWords.some((sourceWord) => {
+    const sourceStem = stem(sourceWord);
+    const sameStem = sourceStem === wordStem;
+    const sameStart = wordStem.length >= 5 && sourceStem.length >= 5 && wordStem.slice(0, 5) === sourceStem.slice(0, 5);
+    return sameStem || sameStart;
+  });
 }
 
 function isBulletSupported(bullet, citedTitles) {
@@ -135,12 +176,14 @@ function isBulletSupported(bullet, citedTitles) {
   const sourceWords = contentWords(sourceText);
   const sourceNumbers = numbersIn(sourceText);
 
-  const inventedNumbers = numbersIn(bullet).filter((number) => !sourceNumbers.includes(number));
+  const bulletText = cleanBulletText(bullet);
+
+  const inventedNumbers = numbersIn(bulletText).filter((number) => !sourceNumbers.includes(number));
   if (inventedNumbers.length > 0) {
     return { supported: false, reason: `number not in sources: ${inventedNumbers[0]}` };
   }
 
-  const bulletWords = contentWords(bullet);
+  const bulletWords = contentWords(bulletText);
   if (bulletWords.length === 0) {
     return { supported: true, reason: 'no content words' };
   }
@@ -189,6 +232,7 @@ module.exports = {
   checkCoverage,
   checkLowValueExcluded,
   checkTokenBudget,
+  cleanBulletText,
   isBulletSupported,
   checkFaithfulness,
 };

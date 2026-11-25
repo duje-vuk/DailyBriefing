@@ -71,3 +71,22 @@ test('faithfulness scores a whole briefing', () => {
   const badBriefing = goodBriefing + '\n- Stocks soar to record highs on tech earnings [2]\n- Oil hits 120 dollars [1]';
   assert.strictEqual(checks.checkFaithfulness(badBriefing, headlines).passed, false);
 });
+
+test('faithfulness ignores bold labels and matches word endings', () => {
+  const titles = ['US jobs report shows unemployment rising to 4.6%'];
+  const labeled = checks.isBulletSupported('*   **US Labor Market:** The latest US jobs report indicates unemployment has risen to 4.6% [1].', titles);
+  assert.strictEqual(labeled.supported, true);
+});
+
+test('formatting is stripped before matching', () => {
+  assert.strictEqual(
+    checks.cleanBulletText('- *Energy:* Oil prices _jump_ **6%** after a pipeline [explosion](https://example.com) halts `exports` [4]'),
+    'Oil prices jump 6% after a pipeline explosion halts exports [4]'
+  );
+  assert.strictEqual(checks.cleanBulletText('1. Germany: New law cuts permit times [8]'), 'New law cuts permit times [8]');
+  assert.strictEqual(checks.cleanBulletText('- ~~Old~~ news [2]'), 'Old news [2]');
+});
+
+test('numbered lists count as bullets', () => {
+  assert.strictEqual(checks.findBullets('## Science\n1. First item [1]\n2. Second item [2]').length, 2);
+});
