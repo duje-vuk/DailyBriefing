@@ -61,7 +61,7 @@ There is one AI call: `/api/briefing` sends the numbered headlines with the prom
 npm test
 ```
 
-Tests cover feed parsing (RSS, Atom, CDATA, entities) and the briefing prompt and reply handling. They need no API key.
+Tests cover feed parsing (RSS, Atom, CDATA, entities), the briefing prompt and reply handling, and the eval checks. They need no API key.
 
 ### Evals
 
@@ -69,7 +69,19 @@ Tests cover feed parsing (RSS, Atom, CDATA, entities) and the briefing prompt an
 npm run eval
 ```
 
-Runs the real prompt on fixed sample headlines and checks the briefing: sections present, at least 4 sources cited, no invented citation numbers, celebrity gossip skipped. Uses your real API key. Run it after changing the prompt or the model.
+Runs the real prompt on 100 synthetic, labeled headlines (`evals/headlines.json`), split into 4 days of 25. Each headline is labeled `mustInclude` (major news), `mustExclude` (celebrity, memes, humor, lifestyle) or `optional` (minor or duplicate stories). Each day is scored on 7 checks:
+
+| Check | Passes when |
+|-------|-------------|
+| Structure | Only the allowed `##` sections are used |
+| Every bullet cited | Every bullet has a `[n]` citation |
+| Valid citation numbers | Every citation points to a real headline |
+| Faithfulness | At least 90% of bullets are backed by their cited headlines: every number matches, and at least half the meaningful words appear |
+| Coverage | At least 90% of `mustInclude` stories are cited |
+| Low-value excluded | No `mustExclude` story is cited |
+| Token budget | The reply stays under 1,500 tokens (`EVAL_MAX_REPLY_TOKENS`) |
+
+The check logic lives in `evals/checks.js` and has its own tests. Faithfulness uses word matching instead of a second AI as judge: it's free and repeatable, but it can miss subtle meaning changes. The eval uses your real API key, 4 AI calls per run. Run it after changing the prompt or the model.
 
 ## Stack
 

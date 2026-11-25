@@ -1,0 +1,525 @@
+{
+  "note": "Synthetic, made-up headlines for evaluating the briefing prompt. Not real news.",
+  "days": [
+    {
+      "name": "Day 1",
+      "headlines": [
+        {
+          "source": "Tech Daily",
+          "title": "Open-weight coding model tops major benchmark, beating closed rivals",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Yen falls to 34-year low as Japan's central bank delays rate hike",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Researchers report sodium battery that lasts 10,000 charge cycles at room temperature",
+          "label": "mustInclude"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "New multilingual speech model released under Apache 2.0 license",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "This year's must-have holiday sweater trends",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Cat that 'plays piano' racks up 50 million views overnight",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Bank of England holds interest rates at 4% citing sticky services inflation",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Policy Watch",
+          "title": "US Senate passes bill requiring watermarks on AI-generated political ads",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Ceasefire talks resume in Cairo as aid convoys stall at border crossing",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "EU leaders agree new sanctions package targeting shadow fleet tankers",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Reality TV couple's breakup sparks fan petition",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Pop star and actor announce surprise wedding in Malibu",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Magnitude 7.4 earthquake strikes off Chile's coast, tsunami warning issued",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Phone maker announces new foldable with brighter hinge display",
+          "label": "optional"
+        },
+        {
+          "source": "Europe Report",
+          "title": "EU sanctions package expands list of banned tanker operators",
+          "label": "optional"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Coffee chain to close 40 underperforming stores in the Midwest",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Show HN: I built a tiny Lisp interpreter in a weekend",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Ask: What's your favorite terminal font in 2026?",
+          "label": "optional"
+        },
+        {
+          "source": "Europe Report",
+          "title": "Germany passes law to cut renewable energy permit times to six months",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Famous chef reveals his secret grocery store snack",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "10 morning routines that will change your life",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Man accidentally mails himself to wrong city, says it was 'a great trip'",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Amateur astronomers spot unusually bright comet visible next week",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Cloud outage knocks out banking apps across Europe for five hours",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Oil prices jump 6% after pipeline explosion halts Caspian exports",
+          "label": "mustInclude"
+        }
+      ]
+    },
+    {
+      "name": "Day 2",
+      "headlines": [
+        {
+          "source": "Market Wire",
+          "title": "Chipmaker shares slide 12% after export restrictions widened",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "The 7 houseplants that are basically impossible to kill",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "UN Security Council deadlocks on resolution over disputed border region",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Regional airline adds direct flights between Lisbon and Montreal",
+          "label": "optional"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Supermodel's dog gets its own clothing line",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Streaming service raises monthly prices by $2 in three markets",
+          "label": "optional"
+        },
+        {
+          "source": "Science Today",
+          "title": "Study finds octopuses may dream during sleep",
+          "label": "optional"
+        },
+        {
+          "source": "Science Today",
+          "title": "WHO declares end of regional mpox emergency after cases fall",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Social network agrees to sell its US operations to local investor group",
+          "label": "mustInclude"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "Lab publishes method cutting large model training costs by 40%",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Show HN: A spreadsheet that runs entirely in your terminal",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Internet divided over whether this dress is blue or green",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Protesters fill capital streets after disputed election results announced",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Critical vulnerability found in widely used open-source logging library",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Award show host criticized for outfit choice on red carpet",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Eurozone inflation unexpectedly rises to 3.1% in October",
+          "label": "mustInclude"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "A beginner's guide to fine-tuning small language models",
+          "label": "optional"
+        },
+        {
+          "source": "Daily World",
+          "title": "The best memes from this week's sports bloopers",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Former boy band member spotted at airport with mystery companion",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Probe returns first samples from inside a near-Earth asteroid",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "France unveils 30 billion euro plan to build six new nuclear reactors",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Patch now: logging library flaw is being exploited in the wild",
+          "label": "optional"
+        },
+        {
+          "source": "Policy Watch",
+          "title": "EU fines search company 2.1 billion euros over self-preferencing in shopping results",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Global shipping rates double as major canal restricts transits over drought",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "Local council's 'worst parking job' competition draws record entries",
+          "label": "mustExclude"
+        }
+      ]
+    },
+    {
+      "name": "Day 3",
+      "headlines": [
+        {
+          "source": "Daily World",
+          "title": "Wildfires force 80,000 evacuations in southern Australia",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "Dutch coalition government collapses after migration dispute",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Toddler's reaction to first snow melts hearts online",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Browser makers agree common standard to block cross-site tracking",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "China announces 1 trillion yuan stimulus package for housing",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "New species of glowing mushroom discovered in Brazil",
+          "label": "optional"
+        },
+        {
+          "source": "Daily World",
+          "title": "Singer debuts new hair color at charity gala",
+          "label": "mustExclude"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "Open-source model matches top proprietary systems on math reasoning",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Your weekly horoscope: big changes ahead for Scorpios",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Policy Watch",
+          "title": "UK passes law requiring age checks on AI chatbots",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Global average temperature for 2026 on track to set new record",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Satellite internet provider loses contact with 40 satellites after solar storm",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Talent show judge storms off set over contestant's song choice",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "How to make the perfect pumpkin spice latte at home",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "Poland and Baltic states announce joint air defense command",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Office worker's brutally honest out-of-office reply goes viral",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Automaker recalls 2 million vehicles over brake software fault",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Gaming console gets limited-edition holiday color",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Ask: How do you organize your side projects?",
+          "label": "optional"
+        },
+        {
+          "source": "Daily World",
+          "title": "Actor's birthday party guest list leaks online",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Australian wildfire smoke reaches New Zealand",
+          "label": "optional"
+        },
+        {
+          "source": "Market Wire",
+          "title": "US jobs report shows unemployment rising to 4.6%",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Show HN: I rewrote my blog engine in Rust for fun",
+          "label": "optional"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Supermarket chain trials checkout-free stores in two cities",
+          "label": "optional"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "Researchers show AI agents can be hijacked through poisoned web pages",
+          "label": "mustInclude"
+        }
+      ]
+    },
+    {
+      "name": "Day 4",
+      "headlines": [
+        {
+          "source": "Daily World",
+          "title": "Ceasefire collapses as shelling resumes along eastern front",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Policy Watch",
+          "title": "India approves national AI safety institute with $500 million budget",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Discussion: running the new 70B open model on consumer GPUs",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Undersea cable cut disrupts internet across East Africa",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Federal Reserve cuts rates by a quarter point and signals a pause",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Pop icon's holiday decorations tour draws crowds",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Phone maker fined for slowing older devices with software update",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "5 signs your houseplant secretly hates you",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Europe Report",
+          "title": "Spain declares drought emergency as reservoirs fall below 20%",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Fusion experiment sustains reaction for a record 22 minutes",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "The internet reacts to the world's longest sandwich",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Two of Europe's largest banks agree 40 billion euro merger",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Dog in a tiny raincoat becomes city's unofficial mascot",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Fans outraged after favorite character killed off in finale",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Toy retailer reports strong early holiday sales",
+          "label": "optional"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "Notes from a conference talk on prompt caching",
+          "label": "optional"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Man spends 9 hours assembling flat-pack furniture, ends up with a chair",
+          "label": "mustExclude"
+        },
+        {
+          "source": "Tech Forum",
+          "title": "Show HN: A tiny habit tracker that fits in a QR code",
+          "label": "optional"
+        },
+        {
+          "source": "Tech Daily",
+          "title": "Smartwatch adds sleep apnea detection in software update",
+          "label": "optional"
+        },
+        {
+          "source": "Market Wire",
+          "title": "Copper price hits record as mine strikes spread in South America",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "Museum unveils restored dinosaur skeleton",
+          "label": "optional"
+        },
+        {
+          "source": "Daily World",
+          "title": "Typhoon makes landfall in the Philippines, 1.2 million without power",
+          "label": "mustInclude"
+        },
+        {
+          "source": "AI Weekly",
+          "title": "AI lab releases model weights for its 70B reasoning model",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Science Today",
+          "title": "First gene therapy for inherited deafness approved in Europe",
+          "label": "mustInclude"
+        },
+        {
+          "source": "Daily World",
+          "title": "Comedian and influencer confirm they have split",
+          "label": "mustExclude"
+        }
+      ]
+    }
+  ]
+}

@@ -1,25 +1,32 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const { buildBriefingMessages, readBriefingText } = require('../briefing');
+const {
+  checkStructure,
+  checkEveryBulletCited,
+  checkValidCitationNumbers,
+  checkCoverage,
+  checkLowValueExcluded,
+  checkTokenBudget,
+  checkFaithfulness,
+} = require('./checks');
 
-const sampleSources = [
-  { source: 'BBC World', title: 'EU leaders agree new sanctions package against Russia' },
-  { source: 'Al Jazeera', title: 'Ceasefire talks resume in Cairo as aid convoys stall' },
-  { source: 'Guardian Business', title: 'Bank of England holds interest rates at 4%' },
-  { source: 'Ars Technica', title: 'Open-weight model beats GPT-class rivals on coding benchmark' },
-  { source: 'The Verge', title: 'Celebrity couple announce surprise wedding in Malibu' },
-  { source: 'DW', title: 'Germany passes law to speed up renewable energy permits' },
-  { source: 'Hacker News', title: 'Show HN: I built a tiny Lisp in a weekend' },
-  { source: 'Hugging Face', title: 'New multilingual speech model released under Apache 2.0' },
+const groqModel = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
+const maxReplyTokens = Number(process.env.EVAL_MAX_REPLY_TOKENS) || 1500;
+const dataset = JSON.parse(fs.readFileSync(path.join(__dirname, 'headlines.json'), 'utf8'));
+
+const checkNames = [
+  'Structure',
+  'Every bullet cited',
+  'Valid citation numbers',
+  'Faithfulness',
+  'Coverage',
+  'Low-value excluded',
+  'Token budget',
 ];
 
-const results = [];
-
-function check(name, passed, detail = '') {
-  results.push(passed);
-  console.log(`[${passed ? 'PASS' : 'FAIL'}] ${name} ${detail}`);
-}
-
-async function main() {
+async function askGroq(messages, extraSettings = {}) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -27,32 +34,72 @@ async function main() {
       'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
-      messages: buildBriefingMessages(sampleSources),
-      temperature: 0.3,
+      model: groqModel,
+      messages: messages,
       reasoning_effort: 'none',
-      max_tokens: 3000,
+      ...extraSettings,
     }),
   });
 
   if (!response.ok) {
-    console.log(`Groq request failed (${response.status}): ${await response.text()}`);
-    process.exit(1);
+    throw new Error(`Groq request failed (${response.status}): ${(await response.text()).slice(0, 200)}`);
+  }
+  return response.json();
+}
+
+async function evaluateDay(day) {
+  const sources = day.headlines.map((headline) => ({ source: headline.source, title: headline.title }));
+
+  const briefingReply = await askGroq(buildBriefingMessages(sources), { temperature: 0.3, max_tokens: 3000 });
+  const briefing = readBriefingText(briefingReply) || '';
+
+  return [
+    checkStructure(briefing),
+    checkEveryBulletCited(briefing),
+    checkValidCitationNumbers(briefing, day.headlines.length),
+    checkFaithfulness(briefing, day.headlines),
+    checkCoverage(briefing, day.headlines),
+    checkLowValueExcluded(briefing, day.headlines),
+    checkTokenBudget(briefingReply.usage, maxReplyTokens),
+  ];
+}
+
+function failedDayResults(error) {
+  return checkNames.map(() => ({ passed: false, detail: error.message }));
+}
+
+async function main() {
+  console.log(`Model: ${groqModel} | ${dataset.days.length} days | ${dataset.days.reduce((sum, day) => sum + day.headlines.length, 0)} headlines\n`);
+
+  const passCounts = checkNames.map(() => 0);
+
+  for (const day of dataset.days) {
+    let results;
+    try {
+      results = await evaluateDay(day);
+    } catch (error) {
+      results = failedDayResults(error);
+    }
+
+    console.log(day.name);
+    results.forEach((result, position) => {
+      if (result.passed) {
+        passCounts[position]++;
+      }
+      console.log(`  [${result.passed ? 'PASS' : 'FAIL'}] ${checkNames[position]}: ${result.detail}`);
+    });
+    console.log('');
   }
 
-  const briefing = readBriefingText(await response.json()) || '';
-  const citedNumbers = [...briefing.matchAll(/\[(\d+(?:,\s*\d+)*)\]/g)]
-    .flatMap((match) => match[1].split(/,\s*/).map(Number));
+  console.log('Summary');
+  checkNames.forEach((name, position) => {
+    console.log(`  ${name}: ${passCounts[position]}/${dataset.days.length} days`);
+  });
 
-  check('has markdown sections', /^## /m.test(briefing));
-  check('contains no thinking text', !briefing.includes('<think>'));
-  check('cites at least 4 sources', new Set(citedNumbers).size >= 4, `(cited ${new Set(citedNumbers).size})`);
-  check('only cites sources that exist', citedNumbers.every((number) => number >= 1 && number <= sampleSources.length));
-  check('skips celebrity gossip', !citedNumbers.includes(5) && !/wedding/i.test(briefing));
-
-  const passedCount = results.filter(Boolean).length;
-  console.log(`\n${passedCount}/${results.length} checks passed`);
-  process.exit(passedCount === results.length ? 0 : 1);
+  const totalPassed = passCounts.reduce((sum, count) => sum + count, 0);
+  const totalChecks = checkNames.length * dataset.days.length;
+  console.log(`\n${totalPassed}/${totalChecks} checks passed`);
+  process.exit(totalPassed === totalChecks ? 0 : 1);
 }
 
 main();
