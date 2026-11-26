@@ -4,7 +4,7 @@ document.getElementById('mastheadDate').textContent = new Date().toLocaleDateStr
 
 async function fetchSourceItems(url) {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
     if (!response.ok) {
       return [];
     }
@@ -119,6 +119,9 @@ function renderSourceList(sourceList) {
     let link = title;
     if (url) {
       link = `<a href="${url}" target="_blank" rel="noopener">${title}</a>`;
+    }
+    if (source.discussionUrl && source.discussionUrl !== source.url) {
+      link += ` <a class="src-discuss" href="${safeUrl(source.discussionUrl)}" target="_blank" rel="noopener">discussion</a>`;
     }
 
     return `<li id="src-${number}"><span class="src-num">${number}</span><span class="src-tag">${escapeHtml(source.source)}</span>${link}</li>`;
@@ -380,7 +383,7 @@ async function generate() {
         fetchSourceItems('/api/feeds?limit=8'),
         fetchSourceItems('/api/hackernews?limit=15'),
       ]),
-      20000,
+      30000,
       timeoutMessage
     );
 

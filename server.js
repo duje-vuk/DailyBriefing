@@ -12,7 +12,9 @@ const groqApiKey = process.env.GROQ_API_KEY;
 const groqModel = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
 
 if (!groqApiKey) {
-  console.warn('  ! GROQ_API_KEY missing — briefings will fail');
+  console.error('\n  ✗ GROQ_API_KEY is missing.');
+  console.error('    Add it to a .env file in this folder (see .env.example), then restart.\n');
+  process.exit(1);
 }
 
 app.use(require('compression')());
@@ -163,7 +165,7 @@ async function fetchOneFeed(feed, itemsPerFeed) {
   const response = await fetchWithRetry(
     feed.url,
     { headers: { 'User-Agent': 'DailyBriefing/1.0' } },
-    { maxRetries: 1, timeout: 6000 }
+    { maxRetries: 2, timeout: 5000 }
   );
   if (!response.ok) {
     throw makeUpstreamError(`${feed.name} feed error`, response.status);
@@ -199,7 +201,7 @@ app.get('/api/feeds', async (req, res) => {
 
 async function fetchHackerNewsStory(storyId) {
   const url = `https://hacker-news.firebaseio.com/v0/item/${storyId}.json`;
-  const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
   if (!response.ok) {
     return null;
   }
@@ -211,7 +213,11 @@ app.get('/api/hackernews', async (req, res) => {
   const cacheKey = `hn:top:${limit}`;
 
   await sendCachedJson(res, cacheKey, async () => {
-    const idsResponse = await fetchWithRetry('https://hacker-news.firebaseio.com/v0/topstories.json');
+    const idsResponse = await fetchWithRetry(
+      'https://hacker-news.firebaseio.com/v0/topstories.json',
+      {},
+      { maxRetries: 2, timeout: 5000 }
+    );
     if (!idsResponse.ok) {
       throw makeUpstreamError('HN error', idsResponse.status);
     }
@@ -232,6 +238,7 @@ app.get('/api/hackernews', async (req, res) => {
         source: 'Hacker News',
         title: story.title,
         url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
+        discussionUrl: `https://news.ycombinator.com/item?id=${story.id}`,
       });
     }
     return stories;
