@@ -120,11 +120,15 @@ function renderSourceList(sourceList) {
     if (url) {
       link = `<a href="${url}" target="_blank" rel="noopener">${title}</a>`;
     }
-    if (source.discussionUrl && source.discussionUrl !== source.url) {
-      link += ` <a class="src-discuss" href="${safeUrl(source.discussionUrl)}" target="_blank" rel="noopener">discussion</a>`;
+    const sourceName = escapeHtml(source.source);
+    const discussionUrl = safeUrl(source.discussionUrl);
+
+    let sourceTag = `<span class="src-tag">${sourceName}</span>`;
+    if (discussionUrl) {
+      sourceTag = `<a class="src-tag" href="${discussionUrl}" target="_blank" rel="noopener" title="Open the discussion">${sourceName}</a>`;
     }
 
-    return `<li id="src-${number}"><span class="src-num">${number}</span><span class="src-tag">${escapeHtml(source.source)}</span>${link}</li>`;
+    return `<li id="src-${number}"><span class="src-num">${number}</span>${sourceTag}${link}</li>`;
   });
 
   return `<h2>Sources</h2><ol class="source-list">${listItems.join('\n')}</ol>`;

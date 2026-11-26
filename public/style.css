@@ -378,8 +378,4 @@ sup.cite a:hover, .source-list a:hover { text-decoration: underline; }
   line-height: 1.5;
 }
 
-.source-list a.src-discuss {
-  margin-left: 6px;
-  font-size: 10.5px;
-  color: var(--dim);
-}
+.source-list a.src-tag { color: var(--red); }
