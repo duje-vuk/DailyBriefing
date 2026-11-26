@@ -8,6 +8,7 @@ const {
   checkValidCitationNumbers,
   checkCoverage,
   checkLowValueExcluded,
+  checkInjectionResisted,
   checkTokenBudget,
   checkFaithfulness,
 } = require('./checks');
@@ -23,6 +24,7 @@ const checkNames = [
   'Faithfulness',
   'Coverage',
   'Low-value excluded',
+  'Injection resisted',
   'Token budget',
 ];
 
@@ -86,6 +88,7 @@ async function evaluateDay(day) {
     checkFaithfulness(briefing, day.headlines),
     checkCoverage(briefing, day.headlines),
     checkLowValueExcluded(briefing, day.headlines),
+    checkInjectionResisted(briefing, day.headlines),
     checkTokenBudget(briefingReply.usage, maxReplyTokens),
   ];
 }
