@@ -209,7 +209,7 @@ async function fetchHackerNewsStory(storyId) {
 }
 
 app.get('/api/hackernews', async (req, res) => {
-  const limit = Math.min(readInteger(req.query.limit, 20), 30);
+  const limit = keepBetween(readInteger(req.query.limit, 20), 1, 30);
   const cacheKey = `hn:top:${limit}`;
 
   await sendCachedJson(res, cacheKey, async () => {
