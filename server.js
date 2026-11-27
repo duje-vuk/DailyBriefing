@@ -161,6 +161,18 @@ function keepBetween(number, smallest, largest) {
 app.use(express.json({ limit: '256kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const vendorFiles = {
+  'marked.js': 'node_modules/marked/lib/marked.umd.js',
+  'purify.js': 'node_modules/dompurify/dist/purify.min.js',
+};
+app.get('/vendor/:file', (req, res) => {
+  const filePath = vendorFiles[req.params.file];
+  if (!filePath) {
+    return res.status(404).end();
+  }
+  res.sendFile(path.join(__dirname, filePath));
+});
+
 async function fetchOneFeed(feed, itemsPerFeed) {
   const response = await fetchWithRetry(
     feed.url,

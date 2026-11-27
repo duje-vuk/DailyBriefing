@@ -75,35 +75,14 @@ function addCitationLinks(html, sourceList) {
   });
 }
 
-function wrapParagraph(block) {
-  block = block.trim();
-  if (!block) {
-    return '';
-  }
-  if (block.startsWith('<')) {
-    return block;
-  }
-  return `<p>${block.replace(/\n/g, '<br>')}</p>`;
-}
-
 function markdownToHtml(text, sourceList) {
-  let html = escapeHtml(text);
-
-  html = html.replace(/```[\s\S]*?```/g, '');
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
-  html = html.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+  const rawHtml = marked.parse(text);
+  let html = DOMPurify.sanitize(rawHtml);
 
   if (sourceList) {
     html = addCitationLinks(html, sourceList);
   }
-
-  const blocks = html.split('\n\n');
-  return blocks.map(wrapParagraph).join('\n');
+  return html;
 }
 
 function renderSourceList(sourceList) {
